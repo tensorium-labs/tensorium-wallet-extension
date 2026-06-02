@@ -4,7 +4,7 @@ This folder contains the current operator-facing materials needed to submit `Ten
 
 ## Current Submission Status
 
-- Build ZIP is available at `submission/tensorium-wallet-extension-v0.1.0.zip`
+- Build ZIP is available at `submission/tensorium-wallet-extension-v0.1.1.zip`
 - Store listing assets are available in `submission/cws-assets-crisp/`
 - Packaged asset bundle is available at `submission/cws-assets-crisp-ready.zip`
 - The store listing copy below is ready to paste into Chrome Web Store fields
@@ -20,14 +20,14 @@ npm run prepare:cws
 
 Expected output:
 
-- `submission/tensorium-wallet-extension-v0.1.0.zip`
+- `submission/tensorium-wallet-extension-v0.1.1.zip`
 
 That ZIP is the extension package to upload in Chrome Web Store Developer Dashboard.
 
 ## Extension Summary
 
 - **Name:** Tensorium Wallet
-- **Version:** 0.1.0
+- **Version:** 0.1.1
 - **Type:** Chrome Extension (Manifest V3)
 - **Category:** Developer Tools
 - **Language:** English
@@ -140,7 +140,7 @@ All screenshots are already rendered at `1280x800` and prepared without alpha.
 2. Run `npm run typecheck`.
 3. Run `npm test`.
 4. Run `npm run prepare:cws`.
-5. Upload `submission/tensorium-wallet-extension-v0.1.0.zip`.
+5. Upload `submission/tensorium-wallet-extension-v0.1.1.zip`.
 6. Paste the title, summary, and detailed description from this file.
 7. Set category to `Developer Tools` and language to `English`.
 8. Upload the icon, screenshots, and promo assets from `submission/cws-assets-crisp/`.
