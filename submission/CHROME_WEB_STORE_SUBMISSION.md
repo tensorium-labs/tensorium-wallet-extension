@@ -61,7 +61,7 @@ Key capabilities:
 - Send TXM transactions from the extension popup
 - Review wallet activity and transaction history
 - Export an encrypted wallet backup for recovery
-- Switch between Tensorium testnet, mainnet-candidate, or a custom RPC endpoint
+- Switch between Tensorium mainnet or a custom RPC endpoint
 
 Why install Tensorium Wallet:
 
@@ -99,7 +99,7 @@ Without this permission, the extension cannot persist wallet state across browse
 
 ### Host permissions
 
-- `https://rpc.tensoriumlabs.com/*`
+- ``
 - `https://mc-rpc.tensoriumlabs.com/*`
 
 Used to:

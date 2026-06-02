@@ -17,8 +17,8 @@
   },
   "permissions": ["storage"],
   "host_permissions": [
-    "https://rpc.tensoriumlabs.com/*",
-    "https://mc-rpc.tensoriumlabs.com/*"
+    "https://mc-rpc.tensoriumlabs.com/*",
+    "https://*.tensoriumlabs.com/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
