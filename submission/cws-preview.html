@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tensorium Wallet CWS Preview</title>
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(255, 209, 102, 0.20), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(98, 214, 200, 0.16), transparent 28%),
+        linear-gradient(180deg, #f7f8fc 0%, #eef2f8 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      width: auto !important;
+      display: grid;
+      place-items: center;
+      padding: 48px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    #root {
+      width: 360px;
+      min-height: 580px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow:
+        0 30px 80px rgba(18, 25, 38, 0.18),
+        0 10px 28px rgba(18, 25, 38, 0.10);
+    }
+  </style>
+  <script>
+    const mockWallet = {
+      version: 1,
+      address: "txm1pektqjnh530q42d8s6tz0jfxj3r3x70y6ae757",
+      public_key_hex: "034016c9304ebccc82ad1b2eb66a8122f83958827fa68f20605972f21f05e03422",
+      encrypted_private_key: {
+        kdf: "argon2id",
+        kdf_memory_kib: 19456,
+        kdf_iterations: 3,
+        kdf_parallelism: 1,
+        cipher: "xchacha20poly1305",
+        salt_hex: "805de4ce42b307526a98c7fd063f566f9c121a5802e86c6638955b811dcdf072",
+        nonce_hex: "d2a85a2be494708e99b076ec9b0b087efa9844104ab6d367",
+        ciphertext_hex: "0bc038d4b0cbe1598b116674bc80cf81ab9e89836a1ed5ee7a22ff34bb55ef3ab2536f4f39972eee05570cab40f195ae21e6322e318626586cbe12b803cd2e9d19c964fb0d2e00cfdf8e122f2cb58057"
+      }
+    };
+
+    const storageState = {
+      txm_wallet: mockWallet,
+      txm_network: "testnet"
+    };
+
+    window.chrome = {
+      storage: {
+        local: {
+          get(keys, cb) {
+            const list = Array.isArray(keys) ? keys : Object.keys(keys || {});
+            const out = {};
+            for (const key of list) out[key] = storageState[key];
+            cb(out);
+          },
+          set(items, cb) {
+            Object.assign(storageState, items || {});
+            cb && cb();
+          },
+          remove(keys, cb) {
+            for (const key of keys || []) delete storageState[key];
+            cb && cb();
+          }
+        }
+      }
+    };
+
+    const mockBlocks = {
+      3: {
+        header: { chain_id: "testnet", height: 3, timestamp_seconds: 1710000000 },
+        transactions: [
+          {
+            id: [1,2,3],
+            inputs: [{ previous_output: { txid: [4,5,6], output_index: 0 }, signature_script: [1] }],
+            outputs: [
+              { value_atoms: 350000000, address: mockWallet.address },
+              { value_atoms: 125000000, address: "txm1qexample00000000000000000000000000000" }
+            ],
+            payload: []
+          }
+        ]
+      },
+      2: {
+        header: { chain_id: "testnet", height: 2, timestamp_seconds: 1709999800 },
+        transactions: [
+          {
+            id: [7,8,9],
+            inputs: [{ previous_output: { txid: [1,1,1], output_index: 1 }, signature_script: [1] }],
+            outputs: [
+              { value_atoms: 150000000, address: mockWallet.address }
+            ],
+            payload: []
+          }
+        ]
+      },
+      1: { header: { chain_id: "testnet", height: 1, timestamp_seconds: 1709999600 }, transactions: [] },
+      0: { header: { chain_id: "testnet", height: 0, timestamp_seconds: 1709999400 }, transactions: [] }
+    };
+
+    window.fetch = async (url, init) => {
+      const href = String(url);
+      if (href.includes("/getutxos/")) {
+        return new Response(JSON.stringify({
+          address: mockWallet.address,
+          tip_height: 3,
+          utxo_count: 2,
+          utxos: [
+            {
+              txid: "demo-utxo-1",
+              txid_bytes: Array.from({ length: 32 }, (_, i) => i + 1),
+              output_index: 0,
+              value_atoms: 350000000,
+              coinbase: false,
+              created_height: 2,
+              mature: true
+            },
+            {
+              txid: "demo-utxo-2",
+              txid_bytes: Array.from({ length: 32 }, (_, i) => i + 33),
+              output_index: 1,
+              value_atoms: 150000000,
+              coinbase: false,
+              created_height: 3,
+              mature: true
+            }
+          ]
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
+      if (href.endsWith("/getblockcount")) {
+        return new Response(JSON.stringify({ blocks: 4, chain_id: "testnet", height: 3 }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      if (href.includes("/getblock/")) {
+        const height = href.split("/getblock/")[1];
+        return new Response(JSON.stringify(mockBlocks[height] || mockBlocks[0]), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      if (href.endsWith("/sendrawtransaction")) {
+        return new Response(JSON.stringify({
+          accepted: true,
+          txid: Array.from({ length: 32 }, (_, i) => (i * 7) % 255),
+          mempool_size: 1
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+
+      return new Response(JSON.stringify({ ok: true, url: href, method: init?.method || "GET" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    };
+
+    if (!navigator.clipboard) {
+      navigator.clipboard = { writeText: async () => {} };
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/popup/main.tsx"></script>
+</body>
+</html>
