@@ -26,7 +26,7 @@ Coming soon. Submission is under review.
 - View address and spendable TXM balance
 - Send TXM transactions with confirmation step
 - Transaction history — last 200 blocks, shows sent and received
-- Network selector: Public Testnet / Mainnet Candidate / Custom RPC
+- Network selector: Mainnet / Custom RPC
 - Export encrypted wallet JSON backup
 - Show/copy private key (requires password or active session)
 - Lock wallet
@@ -35,8 +35,8 @@ Coming soon. Submission is under review.
 
 | Network | RPC |
 |---------|-----|
-| Public Testnet | `https://rpc.tensoriumlabs.com` |
-| Mainnet Candidate | `https://mc-rpc.tensoriumlabs.com` |
+| Mainnet | `https://mc-rpc.tensoriumlabs.com` |
+| Custom RPC | user-defined |
 
 ## Build from source
 
