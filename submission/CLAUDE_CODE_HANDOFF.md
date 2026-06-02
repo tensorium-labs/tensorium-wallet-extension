@@ -1,74 +1,52 @@
-# Claude Code Handoff
+# Claude Code Handoff — Tensorium Wallet Extension
 
-This file is the handoff context for continuing Tensorium Wallet Chrome Web Store submission work in Claude Code.
+Handoff context for continuing work on `tensorium-wallet-extension` in a new Claude Code session.
 
-## Current State
+## Current State (as of 2026-06-02)
 
-- Chrome Web Store copy has been drafted and consolidated in `submission/CHROME_WEB_STORE_SUBMISSION.md`
-- Listing assets have been generated in `submission/cws-assets-crisp/`
-- Asset archive exists at `submission/cws-assets-crisp-ready.zip`
-- Extension upload ZIP exists at `submission/tensorium-wallet-extension-v0.1.0.zip`
-- The likely remaining repo-side task is updating packaged extension icons so the store package preview matches the new listing icon
+- **Version:** `0.1.1`
+- **Repo:** `https://github.com/tensorium-labs/tensorium-wallet-extension`
+- **GitHub Release:** `v0.1.1` live with ZIP attached — users can install manually while CWS review is pending
+- **Chrome Web Store:** Submitted (v0.1.0 package), currently under review. Review typically takes 1–7 days.
+- **ZIP ready:** `submission/tensorium-wallet-extension-v0.1.1.zip` — this is the package to upload as an update once v0.1.0 is approved or if review is rejected and a re-submission is needed
 
-## Relevant Files
+## What Was Completed
 
-- `manifest.json`
-- `public/icons/icon16.png`
-- `public/icons/icon48.png`
-- `public/icons/icon128.png`
-- `submission/CHROME_WEB_STORE_SUBMISSION.md`
-- `submission/cws-assets-crisp/icon-128x128.png`
-- `scripts/package-cws.mjs`
-- `package.json`
+- Icon refresh: all three packaged icons (`icon16`, `icon48`, `icon128`) regenerated from `submission/cws-assets-crisp/icon-128x128.png` (orange "T" logo)
+- History page rewrite: bounded scan (last 200 blocks), detects both sent and received transactions, shows TXID and scan range, no more O(chain-height) hang
+- Version bumped to `0.1.1` in `manifest.json` and `package.json`
+- README with install instructions (Chrome Web Store + manual unpacked)
+- All 20 tests passing, typecheck clean
 
-## Known Gap
+## Stack
 
-The current packaged extension icon appears to be older than the newer crisp store icon.
+- TypeScript + React 18 + Vite + Manifest V3
+- Crypto: `@noble/secp256k1`, `@noble/hashes`, `@noble/ciphers`, `@scure/base`, `hash-wasm` (Argon2id)
+- Wallet file format: 100% compatible with `txmwallet` CLI (Argon2id + XChaCha20Poly1305)
 
-Evidence:
+## Networks
 
-- `public/icons/icon128.png` and `submission/cws-assets-crisp/icon-128x128.png` are different files
-- If Chrome Web Store preview still shows the older blue placeholder icon, the extension package itself needs an icon refresh and rebuild
+| Name | RPC URL |
+|------|---------|
+| Public Testnet | `https://rpc.tensoriumlabs.com` |
+| Mainnet Candidate | `https://mc-rpc.tensoriumlabs.com` |
 
-## Recommended Next Steps
+Both endpoints are HTTPS with CORS + rate-limit (nginx on VPS 157.230.44.162).
 
-1. Inspect the current `public/icons/` set and confirm whether they still use the old icon style.
-2. Regenerate or replace `icon16.png`, `icon48.png`, and `icon128.png` so they match the crisp store icon branding.
-3. Verify `manifest.json` points to the correct icon paths.
-4. Run `npm run typecheck`.
-5. Run `npm test`.
-6. Run `npm run prepare:cws`.
-7. Confirm the rebuilt ZIP and preview assets are consistent.
-8. If needed, refine promo images or screenshots only after icon consistency is fixed.
+## Remaining Work (Phase 8B → 9)
 
-## Prompt For Claude Code
+| Item | Priority | Notes |
+|------|----------|-------|
+| CWS approval → publish v0.1.1 update | High | Upload `v0.1.1.zip` as update after v0.1.0 is approved |
+| RPC SSL health check | Medium | Verify `rpc.tensoriumlabs.com` and `mc-rpc.tensoriumlabs.com` are stable; certbot auto-renew active |
+| QR code on Dashboard for receive address | Low | Nice UX for mainnet |
+| Phase 9C SDK integration | Later | `tensorium-sdk-js` ready; add to wallet once npm token issue is resolved |
+| Mobile wallet | Phase 10 | React Native / Flutter — post-launch |
 
-Use this prompt as-is in Claude Code:
+## Commands
 
-```text
-Continue work in the repo /root/.openclaw/workspace/tensorium-wallet-extension.
-
-Context:
-- This is a Chrome extension called Tensorium Wallet.
-- Submission docs and store copy were updated in submission/CHROME_WEB_STORE_SUBMISSION.md.
-- Chrome Web Store listing assets exist in submission/cws-assets-crisp/.
-- The current likely issue is that the packaged extension icons in public/icons/ do not match the newer crisp listing icon in submission/cws-assets-crisp/icon-128x128.png.
-- The Chrome Web Store preview may still show the old blue placeholder-style icon because the extension package icon set has not been refreshed yet.
-
-Your tasks:
-1. Inspect manifest.json, public/icons/, and submission assets.
-2. Update the packaged extension icon set so icon16, icon48, and icon128 match the new branding.
-3. Rebuild the extension package with npm run prepare:cws.
-4. Run npm run typecheck and npm test.
-5. Update submission/CHROME_WEB_STORE_SUBMISSION.md if any paths or instructions need adjustment after the icon refresh.
-6. Summarize exactly what changed, what was verified, and whether the final ZIP is ready for Chrome Web Store upload.
-
-Constraints:
-- Do not revert unrelated changes.
-- Prefer minimal, targeted edits.
-- If icon source conversion is needed, preserve sharpness and keep the output free of alpha issues that could break Chrome Web Store asset requirements.
+```bash
+npm run typecheck       # type check
+npm test                # 20 unit tests (crypto, storage, session, rpc)
+npm run prepare:cws     # build + package → submission/tensorium-wallet-extension-v0.1.1.zip
 ```
-
-## Operator Note
-
-If Claude Code finishes the icon refresh successfully, the next non-code step is to upload the rebuilt ZIP plus the already prepared listing assets into Chrome Web Store Developer Dashboard and submit for review.
