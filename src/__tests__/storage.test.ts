@@ -49,11 +49,11 @@ describe('storage', () => {
     expect(await loadWallet()).toBeNull();
   });
   it('saves and loads network', async () => {
-    await saveNetwork('mc');
-    expect(await loadNetwork()).toBe('mc');
+    await saveNetwork('mainnet');
+    expect(await loadNetwork()).toBe('mainnet');
   });
-  it('defaults network to testnet', async () => {
-    expect(await loadNetwork()).toBe('testnet');
+  it('defaults network to mainnet', async () => {
+    expect(await loadNetwork()).toBe('mainnet');
   });
 });
 

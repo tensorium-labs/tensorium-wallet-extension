@@ -1,6 +1,6 @@
 import type { WalletFile } from './crypto';
 
-export type Network = 'testnet' | 'mc' | 'custom';
+export type Network = 'mainnet' | 'custom';
 
 const WALLET_KEY = 'txm_wallet';
 const NETWORK_KEY = 'txm_network';
@@ -39,7 +39,7 @@ export async function saveNetwork(network: Network): Promise<void> {
 }
 export async function loadNetwork(): Promise<Network> {
   const r = await chromeGet([NETWORK_KEY]);
-  return (r[NETWORK_KEY] as Network) ?? 'testnet';
+  return (r[NETWORK_KEY] as Network) ?? 'mainnet';
 }
 export async function saveCustomRpc(url: string): Promise<void> {
   await chromeSet({ txm_custom_rpc: url });

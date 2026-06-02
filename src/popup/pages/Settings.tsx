@@ -7,7 +7,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 interface Props { onBack: () => void; onLogout: () => void }
 
 export function Settings({ onBack, onLogout }: Props) {
-  const [network, setNetwork] = useState<Network>('testnet');
+  const [network, setNetwork] = useState<Network>('mainnet');
   const [customRpc, setCustomRpc] = useState('');
   const [showPrivKey, setShowPrivKey] = useState(false);
   const [privKey, setPrivKey] = useState('');
@@ -61,11 +61,11 @@ export function Settings({ onBack, onLogout }: Props) {
 
       <section className="wallet-card">
         <div className="wallet-section-label">Network</div>
-        {(['testnet', 'mc', 'custom'] as Network[]).map((net) => (
+        {(['mainnet', 'custom'] as Network[]).map((net) => (
           <button key={net} onClick={() => saveNetworkSetting(net)}
             className="wallet-btn wallet-btn--secondary"
             style={{ borderColor: network === net ? 'rgba(255, 209, 102, 0.45)' : undefined, color: network === net ? '#ffd166' : undefined, width: '100%', marginBottom: 6, textAlign: 'left' }}>
-            {net === 'testnet' ? 'Testnet' : net === 'mc' ? 'Mainnet Candidate' : 'Custom RPC'}
+            {net === 'mainnet' ? 'Mainnet (mc-rpc.tensoriumlabs.com)' : 'Custom RPC'}
           </button>
         ))}
         {network === 'custom' && (

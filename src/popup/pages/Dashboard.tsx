@@ -10,7 +10,7 @@ interface Props { onNav: (p: Page) => void }
 export function Dashboard({ onNav }: Props) {
   const [address, setAddress] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
-  const [network, setNetwork] = useState<Network>('testnet');
+  const [network, setNetwork] = useState<Network>('mainnet');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -74,7 +74,7 @@ export function Dashboard({ onNav }: Props) {
         <div className="wallet-kpi-grid" style={{ marginTop: 14 }}>
           <div className="wallet-stat">
             <div className="wallet-stat__label">Network</div>
-            <div className="wallet-stat__value">{network === 'mc' ? 'Mainnet Candidate' : network === 'testnet' ? 'Public Testnet' : 'Custom RPC'}</div>
+            <div className="wallet-stat__value">{network === 'mainnet' ? 'Mainnet' : 'Custom RPC'}</div>
           </div>
           <div className="wallet-stat">
             <div className="wallet-stat__label">Status</div>
