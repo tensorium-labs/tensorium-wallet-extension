@@ -93,67 +93,101 @@ export function Onboarding({ onDone }: Props) {
   };
 
   if (step === 'choose') return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Welcome to Tensorium Wallet</h2>
-      <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 8 }}>Your TXM key, your coins.</p>
-      <button onClick={() => setStep('create-password')} style={btnStyle}>Create New Wallet</button>
-      <button onClick={() => setStep('import')} style={{ ...btnStyle, background: '#1e293b', marginTop: 8 }}>Import Existing Wallet</button>
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+        <div className="wallet-brand" style={{ marginBottom: 12 }}>
+          <div className="wallet-brand-mark">T</div>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Welcome</div>
+            <h2>Tensorium Wallet</h2>
+          </div>
+        </div>
+        <p className="wallet-subtle" style={{ marginBottom: 16 }}>
+          Create a fresh wallet or import an existing TXM key. You stay in control of the private key at all times.
+        </p>
+        <div className="wallet-kpi-grid" style={{ marginBottom: 16 }}>
+          <div className="wallet-stat">
+            <div className="wallet-stat__label">Mode</div>
+            <div className="wallet-stat__value">Self-custody</div>
+          </div>
+          <div className="wallet-stat">
+            <div className="wallet-stat__label">Storage</div>
+            <div className="wallet-stat__value">Encrypted local</div>
+          </div>
+        </div>
+        <div className="wallet-stack">
+          <button onClick={() => setStep('create-password')} className="wallet-btn wallet-btn--primary">Create New Wallet</button>
+          <button onClick={() => setStep('import')} className="wallet-btn wallet-btn--secondary">Import Existing Wallet</button>
+        </div>
+      </div>
     </div>
   );
 
   if (step === 'create-password') return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Set Password</h2>
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+      <h2 style={{ margin: 0, fontSize: 20 }}>Set Wallet Password</h2>
+      <p className="wallet-subtle" style={{ marginTop: 6, marginBottom: 10 }}>
+        This password encrypts your local wallet backup and is required to unlock the extension.
+      </p>
       {error && <ErrorBanner message={error} />}
-      <input type="password" placeholder="Password (min 8 chars)" value={password}
-        onChange={(e) => setPassword(e.target.value)} style={inputStyle} autoFocus />
-      <input type="password" placeholder="Confirm password" value={password2}
-        onChange={(e) => setPassword2(e.target.value)} style={inputStyle}
-        onKeyDown={(e) => e.key === 'Enter' && !busy && createWallet()} />
-      <button onClick={createWallet} disabled={busy} style={btnStyle}>
-        {busy ? 'Generating…' : 'Create Wallet'}
-      </button>
+      <div className="wallet-stack">
+        <input type="password" placeholder="Password (min 8 chars)" value={password}
+          onChange={(e) => setPassword(e.target.value)} className="wallet-input" autoFocus />
+        <input type="password" placeholder="Confirm password" value={password2}
+          onChange={(e) => setPassword2(e.target.value)} className="wallet-input"
+          onKeyDown={(e) => e.key === 'Enter' && !busy && createWallet()} />
+        <button onClick={createWallet} disabled={busy} className="wallet-btn wallet-btn--primary">
+          {busy ? 'Generating…' : 'Create Wallet'}
+        </button>
+      </div>
+      </div>
     </div>
   );
 
   if (step === 'create-backup') return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Backup Your Wallet</h2>
-      <p style={{ color: '#fca5a5', fontSize: 13 }}>If you lose your private key, your funds are permanently lost. Download your backup now.</p>
-      <p style={{ color: '#94a3b8', fontSize: 12 }}>Address: <code style={{ color: '#38bdf8' }}>{createdWallet?.address}</code></p>
-      <button onClick={downloadBackup} style={{ ...btnStyle, background: '#0f766e' }}>Download Wallet Backup (.json)</button>
-      {backupDone && (
-        <button onClick={finishCreate} style={{ ...btnStyle, marginTop: 8 }}>I've Saved My Backup — Continue</button>
-      )}
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+        <h2 style={{ margin: 0, fontSize: 20 }}>Backup Your Wallet</h2>
+        <p className="wallet-subtle" style={{ marginTop: 6 }}>
+          Download the encrypted wallet file now. Losing both the password and backup means permanent loss of access.
+        </p>
+        <div className="wallet-card" style={{ marginTop: 14, marginBottom: 14 }}>
+          <div className="wallet-section-label">New Address</div>
+          <div className="wallet-address wallet-code">{createdWallet?.address}</div>
+        </div>
+        <div className="wallet-stack">
+          <button onClick={downloadBackup} className="wallet-btn wallet-btn--secondary">Download Wallet Backup (.json)</button>
+          {backupDone && (
+            <button onClick={finishCreate} className="wallet-btn wallet-btn--primary">I've Saved My Backup — Continue</button>
+          )}
+        </div>
+      </div>
     </div>
   );
 
   return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Import Wallet</h2>
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+      <h2 style={{ margin: 0, fontSize: 20 }}>Import Wallet</h2>
+      <p className="wallet-subtle" style={{ marginTop: 6, marginBottom: 10 }}>
+        Paste a 64-character private key or wallet JSON backup, then set a new local password for this browser.
+      </p>
       {error && <ErrorBanner message={error} />}
-      <textarea placeholder="Paste private key hex (64 chars) or wallet JSON..." value={importInput}
-        onChange={(e) => setImportInput(e.target.value)} rows={4}
-        style={{ ...inputStyle, resize: 'vertical' as React.CSSProperties['resize'] }} />
-      <button onClick={() => fileRef.current?.click()} style={{ ...btnStyle, background: '#1e293b', fontSize: 12 }}>Upload .json file</button>
-      <input ref={fileRef} type="file" accept=".json" onChange={loadFile} style={{ display: 'none' }} />
-      <input type="password" placeholder="Set new password (min 8 chars)" value={password}
-        onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
-      <button onClick={importWallet} disabled={busy || !importInput || !password} style={btnStyle}>
-        {busy ? 'Importing…' : 'Import Wallet'}
-      </button>
-      <button onClick={() => setStep('choose')} style={{ ...btnStyle, background: 'none', color: '#64748b', fontSize: 12 }}>Back</button>
+      <div className="wallet-stack">
+        <textarea placeholder="Paste private key hex (64 chars) or wallet JSON..." value={importInput}
+          onChange={(e) => setImportInput(e.target.value)} rows={4}
+          className="wallet-textarea" />
+        <button onClick={() => fileRef.current?.click()} className="wallet-btn wallet-btn--secondary">Upload .json file</button>
+        <input ref={fileRef} type="file" accept=".json" onChange={loadFile} style={{ display: 'none' }} />
+        <input type="password" placeholder="Set new password (min 8 chars)" value={password}
+          onChange={(e) => setPassword(e.target.value)} className="wallet-input" />
+        <button onClick={importWallet} disabled={busy || !importInput || !password} className="wallet-btn wallet-btn--primary">
+          {busy ? 'Importing…' : 'Import Wallet'}
+        </button>
+        <button onClick={() => setStep('choose')} className="wallet-btn wallet-btn--ghost">Back</button>
+      </div>
+      </div>
     </div>
   );
 }
-
-const pageStyle: React.CSSProperties = { padding: 24, display: 'flex', flexDirection: 'column', gap: 10 };
-const titleStyle: React.CSSProperties = { color: '#38bdf8', fontSize: 18, marginBottom: 4 };
-const inputStyle: React.CSSProperties = {
-  background: '#1e293b', border: '1px solid #334155', color: '#e2e8f0',
-  borderRadius: 6, padding: '10px 12px', fontSize: 14, outline: 'none', width: '100%',
-};
-const btnStyle: React.CSSProperties = {
-  background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 6,
-  padding: '10px 0', fontSize: 14, cursor: 'pointer', width: '100%',
-};

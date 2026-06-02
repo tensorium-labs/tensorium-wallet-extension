@@ -46,38 +46,50 @@ export function Dashboard({ onNav }: Props) {
   };
 
   return (
-    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: '#38bdf8', fontSize: 16 }}>Tensorium Wallet</h2>
+    <div className="wallet-page">
+      <div className="wallet-topbar">
+        <div className="wallet-brand">
+          <div className="wallet-brand-mark">T</div>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Wallet overview</div>
+            <h2>Tensorium Wallet</h2>
+          </div>
+        </div>
         <NetworkBadge network={network} />
       </div>
       {error && <ErrorBanner message={error} onRetry={refresh} />}
-      <div style={{ background: '#1e293b', borderRadius: 8, padding: 14 }}>
-        <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>ADDRESS</div>
-        <div style={{ fontSize: 12, color: '#e2e8f0', wordBreak: 'break-all' }}>{address}</div>
-        <button onClick={copy} style={smallBtnStyle}>{copied ? 'Copied' : 'Copy'}</button>
+      <div className="wallet-surface" style={{ padding: 16 }}>
+        <div className="wallet-section-label">Current wallet</div>
+        <div className="wallet-address wallet-code">{address}</div>
+        <div className="wallet-row" style={{ marginTop: 12 }}>
+          <button onClick={copy} className="wallet-btn wallet-btn--secondary">{copied ? 'Copied' : 'Copy address'}</button>
+          <button onClick={refresh} className="wallet-btn wallet-btn--ghost">Refresh</button>
+        </div>
       </div>
-      <div style={{ background: '#1e293b', borderRadius: 8, padding: 14 }}>
-        <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>BALANCE</div>
-        <div style={{ fontSize: 22, color: '#38bdf8', fontWeight: 700 }}>
+      <div className="wallet-surface" style={{ padding: 16 }}>
+        <div className="wallet-section-label">Spendable balance</div>
+        <div className="wallet-balance wallet-balance--accent">
           {balance === null ? '—' : formatTxm(balance)}
         </div>
-        <button onClick={refresh} style={smallBtnStyle}>Refresh</button>
+        <div className="wallet-kpi-grid" style={{ marginTop: 14 }}>
+          <div className="wallet-stat">
+            <div className="wallet-stat__label">Network</div>
+            <div className="wallet-stat__value">{network === 'mc' ? 'Mainnet Candidate' : network === 'testnet' ? 'Public Testnet' : 'Custom RPC'}</div>
+          </div>
+          <div className="wallet-stat">
+            <div className="wallet-stat__label">Status</div>
+            <div className="wallet-stat__value">Ready</div>
+          </div>
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={() => onNav('send')} style={actionBtnStyle}>Send</button>
-        <button onClick={() => onNav('history')} style={actionBtnStyle}>History</button>
-        <button onClick={() => onNav('settings')} style={actionBtnStyle}>Settings</button>
+      <div className="wallet-pill-nav">
+        <button onClick={() => onNav('send')} className="wallet-btn wallet-btn--primary">Send</button>
+        <button onClick={() => onNav('history')} className="wallet-btn wallet-btn--secondary">History</button>
+        <button onClick={() => onNav('settings')} className="wallet-btn wallet-btn--secondary">Settings</button>
+      </div>
+      <div className="wallet-footer-note">
+        Tensorium Wallet currently shows mature balance from RPC UTXOs. Advanced indexing and richer transaction history can come later without blocking UI polish now.
       </div>
     </div>
   );
 }
-
-const smallBtnStyle: React.CSSProperties = {
-  marginTop: 8, background: 'none', border: '1px solid #334155', color: '#94a3b8',
-  borderRadius: 4, padding: '3px 10px', fontSize: 11, cursor: 'pointer',
-};
-const actionBtnStyle: React.CSSProperties = {
-  flex: 1, background: '#0f172a', border: '1px solid #334155', color: '#e2e8f0',
-  borderRadius: 6, padding: '10px 0', fontSize: 13, cursor: 'pointer',
-};

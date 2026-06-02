@@ -27,26 +27,32 @@ export function Locked({ onUnlocked }: Props) {
   };
 
   return (
-    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <h2 style={{ color: '#38bdf8', fontSize: 18 }}>Tensorium Wallet</h2>
-      <p style={{ color: '#94a3b8', fontSize: 13 }}>Enter your password to unlock.</p>
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+        <div className="wallet-brand" style={{ marginBottom: 14 }}>
+          <div className="wallet-brand-mark">T</div>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Self-custody TXM wallet</div>
+            <h2>Unlock Tensorium Wallet</h2>
+          </div>
+        </div>
+        <p className="wallet-subtle" style={{ marginBottom: 14 }}>
+          Enter your password to decrypt the local wallet and restore the active session.
+        </p>
       {error && <ErrorBanner message={error} />}
-      <input type="password" placeholder="Password" value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && !busy && unlock()}
-        style={inputStyle} autoFocus />
-      <button onClick={unlock} disabled={busy || !password} style={btnStyle}>
-        {busy ? 'Unlocking…' : 'Unlock'}
-      </button>
+        <div className="wallet-stack">
+          <input type="password" placeholder="Password" value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !busy && unlock()}
+            className="wallet-input" autoFocus />
+          <button onClick={unlock} disabled={busy || !password} className="wallet-btn wallet-btn--primary">
+            {busy ? 'Unlocking…' : 'Unlock'}
+          </button>
+          <div className="wallet-footer-note">
+            Keys remain in local extension storage. Nothing is sent to Tensorium servers except RPC reads and signed transaction broadcast.
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  background: '#1e293b', border: '1px solid #334155', color: '#e2e8f0',
-  borderRadius: 6, padding: '10px 12px', fontSize: 14, outline: 'none', width: '100%',
-};
-const btnStyle: React.CSSProperties = {
-  background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 6,
-  padding: '10px 0', fontSize: 14, cursor: 'pointer', width: '100%',
-};

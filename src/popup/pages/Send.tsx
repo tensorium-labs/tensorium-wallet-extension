@@ -101,54 +101,74 @@ export function Send({ onBack }: Props) {
     `${Math.floor(atoms / 100_000_000)}.${(atoms % 100_000_000).toString().padStart(8, '0')} TXM`;
 
   if (step === 'success') return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Transaction Sent</h2>
-      <p style={{ color: '#22c55e', fontSize: 13 }}>Accepted by the network.</p>
-      <p style={{ fontSize: 11, color: '#64748b', wordBreak: 'break-all', marginTop: 8 }}>TXID: {txid}</p>
-      <button onClick={onBack} style={btnStyle}>Back to Dashboard</button>
+    <div className="wallet-page wallet-page--centered">
+      <div className="wallet-surface" style={{ padding: 22 }}>
+        <div className="wallet-eyebrow">Broadcast complete</div>
+        <h2 style={{ margin: 0, fontSize: 22 }}>Transaction Sent</h2>
+        <p className="wallet-subtle" style={{ marginTop: 8 }}>The transaction was accepted by the network RPC.</p>
+        <div className="wallet-card" style={{ marginTop: 14, marginBottom: 14 }}>
+          <div className="wallet-section-label">TXID</div>
+          <div className="wallet-code wallet-address">{txid}</div>
+        </div>
+        <button onClick={onBack} className="wallet-btn wallet-btn--primary">Back to Dashboard</button>
+      </div>
     </div>
   );
 
   if (step === 'confirm') return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Confirm Transaction</h2>
-      <div style={{ background: '#1e293b', borderRadius: 8, padding: 14, fontSize: 13 }}>
-        <div><span style={{ color: '#64748b' }}>To: </span>{toAddress}</div>
-        <div style={{ marginTop: 8 }}><span style={{ color: '#64748b' }}>Amount: </span>
-          <strong style={{ color: '#38bdf8' }}>{fmt(amountAtoms)}</strong></div>
+    <div className="wallet-page">
+      <div className="wallet-topbar">
+        <div className="wallet-brand">
+          <button onClick={() => setStep('form')} className="wallet-back">←</button>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Final review</div>
+            <h2>Confirm Transaction</h2>
+          </div>
+        </div>
       </div>
-      <p style={{ color: '#fca5a5', fontSize: 12 }}>Transactions are irreversible. No fee applies.</p>
+      <div className="wallet-surface" style={{ padding: 16 }}>
+        <div className="wallet-section-label">Recipient</div>
+        <div className="wallet-address wallet-code">{toAddress}</div>
+        <div className="wallet-divider"></div>
+        <div className="wallet-section-label">Amount</div>
+        <div className="wallet-balance wallet-balance--accent" style={{ fontSize: 22 }}>{fmt(amountAtoms)}</div>
+      </div>
+      <p className="wallet-note" style={{ color: '#ffd3d3' }}>Transactions are irreversible. No fee applies.</p>
       {error && <ErrorBanner message={error} />}
-      <button onClick={send} disabled={busy} style={btnStyle}>{busy ? 'Broadcasting…' : 'Confirm & Send'}</button>
-      <button onClick={() => setStep('form')} style={{ ...btnStyle, background: '#1e293b' }}>Cancel</button>
+      <div className="wallet-stack">
+        <button onClick={send} disabled={busy} className="wallet-btn wallet-btn--primary">{busy ? 'Broadcasting…' : 'Confirm & Send'}</button>
+        <button onClick={() => setStep('form')} className="wallet-btn wallet-btn--secondary">Cancel</button>
+      </div>
     </div>
   );
 
   return (
-    <div style={pageStyle}>
-      <h2 style={titleStyle}>Send TXM</h2>
-      <p style={{ color: '#94a3b8', fontSize: 12 }}>Balance: {fmt(balance)}</p>
+    <div className="wallet-page">
+      <div className="wallet-topbar">
+        <div className="wallet-brand">
+          <button onClick={onBack} className="wallet-back">←</button>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Transfer</div>
+            <h2>Send TXM</h2>
+          </div>
+        </div>
+      </div>
+      <div className="wallet-card">
+        <div className="wallet-section-label">Available balance</div>
+        <div className="wallet-balance wallet-balance--accent" style={{ fontSize: 22 }}>{fmt(balance)}</div>
+      </div>
       {error && <ErrorBanner message={error} />}
       <input placeholder="Recipient address (txm1...)" value={toAddress}
-        onChange={(e) => setToAddress(e.target.value)} style={inputStyle} />
+        onChange={(e) => setToAddress(e.target.value)} className="wallet-input" />
       {toAddress && !isValidTxmAddress(toAddress) && (
-        <span style={{ color: '#fca5a5', fontSize: 11 }}>Invalid address format</span>
+        <span className="wallet-note" style={{ color: '#ffd3d3' }}>Invalid address format</span>
       )}
       <input placeholder="Amount in TXM (e.g. 1.5)" value={amountTxm}
-        onChange={(e) => setAmountTxm(e.target.value)} type="number" min="0" style={inputStyle} />
-      <button onClick={review} disabled={!toAddress || !amountTxm} style={btnStyle}>Review</button>
-      <button onClick={onBack} style={{ ...btnStyle, background: '#1e293b' }}>Back</button>
+        onChange={(e) => setAmountTxm(e.target.value)} type="number" min="0" className="wallet-input" />
+      <div className="wallet-stack">
+        <button onClick={review} disabled={!toAddress || !amountTxm} className="wallet-btn wallet-btn--primary">Review</button>
+        <button onClick={onBack} className="wallet-btn wallet-btn--secondary">Back</button>
+      </div>
     </div>
   );
 }
-
-const pageStyle: React.CSSProperties = { padding: 20, display: 'flex', flexDirection: 'column', gap: 12 };
-const titleStyle: React.CSSProperties = { color: '#38bdf8', fontSize: 18 };
-const inputStyle: React.CSSProperties = {
-  background: '#1e293b', border: '1px solid #334155', color: '#e2e8f0',
-  borderRadius: 6, padding: '10px 12px', fontSize: 14, outline: 'none', width: '100%',
-};
-const btnStyle: React.CSSProperties = {
-  background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 6,
-  padding: '10px 0', fontSize: 14, cursor: 'pointer', width: '100%',
-};

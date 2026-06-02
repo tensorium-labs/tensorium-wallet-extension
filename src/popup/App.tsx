@@ -24,17 +24,26 @@ export default function App() {
   }, []);
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 580 }}>
-      <span style={{ color: '#64748b' }}>Loading…</span>
+    <div className="app-shell wallet-loading">
+      <div className="wallet-surface wallet-loading-card">
+        <div className="wallet-loading-spinner"></div>
+        <div className="wallet-eyebrow">Tensorium Wallet</div>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Preparing secure session</div>
+        <div className="wallet-subtle">Loading wallet state and selecting the right flow.</div>
+      </div>
     </div>
   );
 
   const nav = (p: Page) => setPage(p);
 
-  if (page === 'onboarding') return <Onboarding onDone={() => nav('dashboard')} />;
-  if (page === 'locked') return <Locked onUnlocked={() => nav('dashboard')} />;
-  if (page === 'send') return <Send onBack={() => nav('dashboard')} />;
-  if (page === 'history') return <History onBack={() => nav('dashboard')} />;
-  if (page === 'settings') return <Settings onBack={() => nav('dashboard')} onLogout={() => nav('locked')} />;
-  return <Dashboard onNav={nav} />;
+  const content = (() => {
+    if (page === 'onboarding') return <Onboarding onDone={() => nav('dashboard')} />;
+    if (page === 'locked') return <Locked onUnlocked={() => nav('dashboard')} />;
+    if (page === 'send') return <Send onBack={() => nav('dashboard')} />;
+    if (page === 'history') return <History onBack={() => nav('dashboard')} />;
+    if (page === 'settings') return <Settings onBack={() => nav('dashboard')} onLogout={() => nav('locked')} />;
+    return <Dashboard onNav={nav} />;
+  })();
+
+  return <div className="app-shell">{content}</div>;
 }

@@ -3,7 +3,7 @@ import { loadWallet, loadNetwork } from '../../lib/storage';
 import { createRpcClient, RPC_URLS, type BlockResponse } from '../../lib/rpc';
 import { ErrorBanner } from '../components/ErrorBanner';
 
-interface TxEntry { height: number; direction: 'in' | 'out'; amount_atoms: number }
+interface TxEntry { height: number; amount_atoms: number }
 interface Props { onBack: () => void }
 
 export function History({ onBack }: Props) {
@@ -32,7 +32,7 @@ export function History({ onBack }: Props) {
               const received = tx.outputs
                 .filter((o) => o.address === address)
                 .reduce((sum, o) => sum + o.value_atoms, 0);
-              if (received > 0) found.push({ height: h, direction: 'in', amount_atoms: received });
+              if (received > 0) found.push({ height: h, amount_atoms: received });
             }
           } catch { skip++; }
         }
@@ -49,34 +49,34 @@ export function History({ onBack }: Props) {
     `${Math.floor(atoms / 100_000_000)}.${(atoms % 100_000_000).toString().padStart(8, '0')}`;
 
   return (
-    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={onBack} style={backBtn}>←</button>
-        <h2 style={{ color: '#38bdf8', fontSize: 16 }}>Transaction History</h2>
+    <div className="wallet-page">
+      <div className="wallet-topbar">
+        <div className="wallet-brand">
+          <button onClick={onBack} className="wallet-back">←</button>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Received transfers</div>
+            <h2>Transaction History</h2>
+          </div>
+        </div>
       </div>
       {error && <ErrorBanner message={error} />}
-      {skipped > 0 && <p style={{ color: '#f59e0b', fontSize: 11 }}>{skipped} blocks unavailable</p>}
-      {loading && <p style={{ color: '#64748b', fontSize: 13 }}>Scanning blocks…</p>}
-      {!loading && entries.length === 0 && <p style={{ color: '#64748b', fontSize: 13 }}>No transactions found.</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {skipped > 0 && <p className="wallet-note" style={{ color: '#f7c76a' }}>{skipped} blocks unavailable</p>}
+      {loading && <div className="wallet-card"><p className="wallet-subtle">Scanning blocks…</p></div>}
+      {!loading && entries.length === 0 && <div className="wallet-card"><p className="wallet-subtle">No transactions found.</p></div>}
+      <div className="wallet-list">
         {entries.map((e, i) => (
-          <div key={i} style={{ background: '#1e293b', borderRadius: 6, padding: '10px 14px', fontSize: 13 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#22c55e' }}>+ Received</span>
-              <span style={{ color: '#38bdf8', fontWeight: 600 }}>{fmt(e.amount_atoms)} TXM</span>
+          <div key={i} className="wallet-history-item">
+            <div className="wallet-history-head">
+              <span style={{ color: '#87e887', fontWeight: 700 }}>+ Received</span>
+              <span style={{ color: '#ffd166', fontWeight: 700 }}>{fmt(e.amount_atoms)} TXM</span>
             </div>
-            <div style={{ color: '#475569', fontSize: 11, marginTop: 4 }}>Block #{e.height}</div>
+            <div className="wallet-note" style={{ marginTop: 6 }}>Block #{e.height}</div>
           </div>
         ))}
       </div>
-      <p style={{ color: '#334155', fontSize: 10, textAlign: 'center' }}>
+      <p className="wallet-footer-note">
         Showing received transactions. Outgoing detection requires indexer (Phase 9B).
       </p>
     </div>
   );
 }
-
-const backBtn: React.CSSProperties = {
-  background: 'none', border: '1px solid #334155', color: '#94a3b8',
-  borderRadius: 4, padding: '4px 10px', cursor: 'pointer',
-};

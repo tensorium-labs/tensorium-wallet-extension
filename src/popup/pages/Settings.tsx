@@ -47,59 +47,59 @@ export function Settings({ onBack, onLogout }: Props) {
   const lock = () => { clearSession(); onLogout(); };
 
   return (
-    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={onBack} style={backBtn}>←</button>
-        <h2 style={{ color: '#38bdf8', fontSize: 16 }}>Settings</h2>
+    <div className="wallet-page">
+      <div className="wallet-topbar">
+        <div className="wallet-brand">
+          <button onClick={onBack} className="wallet-back">←</button>
+          <div className="wallet-brand-copy">
+            <div className="wallet-eyebrow">Control panel</div>
+            <h2>Settings</h2>
+          </div>
+        </div>
       </div>
       {error && <ErrorBanner message={error} />}
 
-      <section>
-        <div style={sectionLabel}>Network</div>
+      <section className="wallet-card">
+        <div className="wallet-section-label">Network</div>
         {(['testnet', 'mc', 'custom'] as Network[]).map((net) => (
           <button key={net} onClick={() => saveNetworkSetting(net)}
-            style={{ ...optionBtn, borderColor: network === net ? '#0ea5e9' : '#334155', color: network === net ? '#38bdf8' : '#94a3b8' }}>
+            className="wallet-btn wallet-btn--secondary"
+            style={{ borderColor: network === net ? 'rgba(255, 209, 102, 0.45)' : undefined, color: network === net ? '#ffd166' : undefined, width: '100%', marginBottom: 6, textAlign: 'left' }}>
             {net === 'testnet' ? 'Testnet' : net === 'mc' ? 'Mainnet Candidate' : 'Custom RPC'}
           </button>
         ))}
         {network === 'custom' && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div className="wallet-row" style={{ marginTop: 8 }}>
             <input value={customRpc} onChange={(e) => setCustomRpc(e.target.value)}
-              placeholder="https://..." style={{ ...inputStyle, flex: 1 }} />
-            <button onClick={saveCustomRpcSetting} style={smallSaveBtn}>Save</button>
+              placeholder="https://..." className="wallet-input" />
+            <button onClick={saveCustomRpcSetting} className="wallet-btn wallet-btn--primary">Save</button>
           </div>
         )}
       </section>
 
-      <section>
-        <div style={sectionLabel}>Private Key</div>
+      <section className="wallet-card">
+        <div className="wallet-section-label">Private Key</div>
         {!showPrivKey ? (
           <>
             <input type="password" placeholder="Verify password to reveal (optional if unlocked)"
-              value={privKeyPassword} onChange={(e) => setPrivKeyPassword(e.target.value)} style={inputStyle} />
-            <button onClick={revealPrivKey} style={{ ...optionBtn, color: '#f59e0b', borderColor: '#78350f' }}>Show Private Key</button>
+              value={privKeyPassword} onChange={(e) => setPrivKeyPassword(e.target.value)} className="wallet-input" />
+            <button onClick={revealPrivKey} className="wallet-btn wallet-btn--secondary" style={{ width: '100%', color: '#ffd166' }}>Show Private Key</button>
           </>
         ) : (
           <div>
-            <p style={{ color: '#fca5a5', fontSize: 11, marginBottom: 6 }}>Never share your private key.</p>
-            <code style={{ fontSize: 10, color: '#38bdf8', wordBreak: 'break-all', background: '#0f172a', padding: 8, borderRadius: 4, display: 'block' }}>{privKey}</code>
-            <button onClick={() => navigator.clipboard.writeText(privKey)} style={{ ...optionBtn, marginTop: 6, fontSize: 11 }}>Copy</button>
+            <p className="wallet-note" style={{ color: '#ffd3d3', marginBottom: 8 }}>Never share your private key.</p>
+            <code className="wallet-code" style={{ color: '#ffd166', background: 'rgba(0,0,0,0.24)', padding: 10, borderRadius: 10, display: 'block' }}>{privKey}</code>
+            <button onClick={() => navigator.clipboard.writeText(privKey)} className="wallet-btn wallet-btn--secondary" style={{ width: '100%', marginTop: 8 }}>Copy</button>
           </div>
         )}
       </section>
 
-      <section>
-        <div style={sectionLabel}>Backup</div>
-        <button onClick={exportWallet} style={optionBtn}>Export Wallet JSON</button>
+      <section className="wallet-card">
+        <div className="wallet-section-label">Backup</div>
+        <button onClick={exportWallet} className="wallet-btn wallet-btn--secondary" style={{ width: '100%' }}>Export Wallet JSON</button>
       </section>
 
-      <button onClick={lock} style={{ ...optionBtn, color: '#f87171', borderColor: '#7f1d1d', marginTop: 8 }}>Lock Wallet</button>
+      <button onClick={lock} className="wallet-btn wallet-btn--danger">Lock Wallet</button>
     </div>
   );
 }
-
-const sectionLabel: React.CSSProperties = { fontSize: 11, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 };
-const optionBtn: React.CSSProperties = { width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#e2e8f0', borderRadius: 6, padding: '9px 12px', fontSize: 13, cursor: 'pointer', textAlign: 'left', marginBottom: 4 };
-const inputStyle: React.CSSProperties = { background: '#1e293b', border: '1px solid #334155', color: '#e2e8f0', borderRadius: 6, padding: '8px 12px', fontSize: 13, outline: 'none', width: '100%' };
-const smallSaveBtn: React.CSSProperties = { background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 14px', fontSize: 12, cursor: 'pointer' };
-const backBtn: React.CSSProperties = { background: 'none', border: '1px solid #334155', color: '#94a3b8', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' };
