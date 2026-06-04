@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { loadWallet, loadNetwork } from '../../lib/storage';
 import { createRpcClient, RPC_URLS, type BlockResponse, type TxOutput } from '../../lib/rpc';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
 const SCAN_DEPTH = 200;
@@ -110,6 +111,7 @@ export function History({ onBack }: Props) {
       <div className="wallet-topbar">
         <div className="wallet-brand">
           <button onClick={onBack} className="wallet-back">←</button>
+          <BrandMark size="sm" />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Recent activity</div>
             <h2>Transaction History</h2>

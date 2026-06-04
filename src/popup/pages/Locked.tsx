@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { loadWallet } from '../../lib/storage';
 import { decryptPrivateKey } from '../../lib/crypto';
 import { setSession } from '../../lib/session';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
 interface Props { onUnlocked: () => void }
@@ -30,7 +31,7 @@ export function Locked({ onUnlocked }: Props) {
     <div className="wallet-page wallet-page--centered">
       <div className="wallet-surface" style={{ padding: 22 }}>
         <div className="wallet-brand" style={{ marginBottom: 14 }}>
-          <div className="wallet-brand-mark">T</div>
+          <BrandMark />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Self-custody TXM wallet</div>
             <h2>Unlock Tensorium Wallet</h2>

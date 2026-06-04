@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { loadWallet, loadNetwork, saveNetwork, loadCustomRpc, saveCustomRpc, type Network } from '../../lib/storage';
 import { decryptPrivateKey, type WalletFile } from '../../lib/crypto';
 import { clearSession, getSession } from '../../lib/session';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
 interface Props { onBack: () => void; onLogout: () => void }
@@ -51,6 +52,7 @@ export function Settings({ onBack, onLogout }: Props) {
       <div className="wallet-topbar">
         <div className="wallet-brand">
           <button onClick={onBack} className="wallet-back">←</button>
+          <BrandMark size="sm" />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Control panel</div>
             <h2>Settings</h2>

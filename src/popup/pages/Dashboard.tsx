@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { loadWallet, loadNetwork, type Network } from '../../lib/storage';
 import { createRpcClient, RPC_URLS, type UtxoEntry } from '../../lib/rpc';
 import { NetworkBadge } from '../components/NetworkBadge';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 import type { Page } from '../App';
 
@@ -10,6 +11,8 @@ interface Props { onNav: (p: Page) => void }
 export function Dashboard({ onNav }: Props) {
   const [address, setAddress] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
+  const [pendingBalance, setPendingBalance] = useState<number>(0);
+  const [pendingCount, setPendingCount] = useState<number>(0);
   const [network, setNetwork] = useState<Network>('mainnet');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -26,7 +29,10 @@ export function Dashboard({ onNav }: Props) {
       const rpc = createRpcClient(rpcUrl);
       const { utxos } = await rpc.getUtxos(wallet.address);
       const mature = utxos.filter((u: UtxoEntry) => u.mature);
+      const immatureCoinbase = utxos.filter((u: UtxoEntry) => !u.mature && u.coinbase);
       setBalance(mature.reduce((sum: number, u: UtxoEntry) => sum + u.value_atoms, 0));
+      setPendingBalance(immatureCoinbase.reduce((sum: number, u: UtxoEntry) => sum + u.value_atoms, 0));
+      setPendingCount(immatureCoinbase.length);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load balance.');
     }
@@ -49,7 +55,7 @@ export function Dashboard({ onNav }: Props) {
     <div className="wallet-page">
       <div className="wallet-topbar">
         <div className="wallet-brand">
-          <div className="wallet-brand-mark">T</div>
+          <BrandMark />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Wallet overview</div>
             <h2>Tensorium Wallet</h2>
@@ -82,13 +88,24 @@ export function Dashboard({ onNav }: Props) {
           </div>
         </div>
       </div>
+      {pendingBalance > 0 && (
+        <div className="wallet-card">
+          <div className="wallet-section-label">Pending mining rewards</div>
+          <div className="wallet-balance" style={{ fontSize: 22 }}>
+            {formatTxm(pendingBalance)}
+          </div>
+          <div className="wallet-note" style={{ marginTop: 8 }}>
+            {pendingCount} coinbase UTXO pending maturity. These rewards will become spendable after enough confirmations.
+          </div>
+        </div>
+      )}
       <div className="wallet-pill-nav">
         <button onClick={() => onNav('send')} className="wallet-btn wallet-btn--primary">Send</button>
         <button onClick={() => onNav('history')} className="wallet-btn wallet-btn--secondary">History</button>
         <button onClick={() => onNav('settings')} className="wallet-btn wallet-btn--secondary">Settings</button>
       </div>
       <div className="wallet-footer-note">
-        Tensorium Wallet currently shows mature balance from RPC UTXOs. Advanced indexing and richer transaction history can come later without blocking UI polish now.
+        Tensorium Wallet currently shows spendable mature balance from RPC UTXOs. Coinbase mining rewards stay pending until maturity.
       </div>
     </div>
   );

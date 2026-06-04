@@ -3,6 +3,7 @@ import { loadWallet, loadNetwork } from '../../lib/storage';
 import { getSession } from '../../lib/session';
 import { hexToBytes, signTransaction, type WalletTx } from '../../lib/crypto';
 import { createRpcClient, RPC_URLS, type UtxoEntry } from '../../lib/rpc';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
 interface Props { onBack: () => void }
@@ -120,6 +121,7 @@ export function Send({ onBack }: Props) {
       <div className="wallet-topbar">
         <div className="wallet-brand">
           <button onClick={() => setStep('form')} className="wallet-back">←</button>
+          <BrandMark size="sm" />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Final review</div>
             <h2>Confirm Transaction</h2>
@@ -147,6 +149,7 @@ export function Send({ onBack }: Props) {
       <div className="wallet-topbar">
         <div className="wallet-brand">
           <button onClick={onBack} className="wallet-back">←</button>
+          <BrandMark size="sm" />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Transfer</div>
             <h2>Send TXM</h2>

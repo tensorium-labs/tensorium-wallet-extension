@@ -5,6 +5,7 @@ import {
 } from '../../lib/crypto';
 import { saveWallet } from '../../lib/storage';
 import { setSession } from '../../lib/session';
+import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
 interface Props { onDone: () => void }
@@ -96,7 +97,7 @@ export function Onboarding({ onDone }: Props) {
     <div className="wallet-page wallet-page--centered">
       <div className="wallet-surface" style={{ padding: 22 }}>
         <div className="wallet-brand" style={{ marginBottom: 12 }}>
-          <div className="wallet-brand-mark">T</div>
+          <BrandMark />
           <div className="wallet-brand-copy">
             <div className="wallet-eyebrow">Welcome</div>
             <h2>Tensorium Wallet</h2>
