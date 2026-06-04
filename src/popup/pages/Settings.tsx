@@ -65,7 +65,7 @@ export function Settings({ onBack, onLogout }: Props) {
           <button key={net} onClick={() => saveNetworkSetting(net)}
             className="wallet-btn wallet-btn--secondary"
             style={{ borderColor: network === net ? 'rgba(255, 209, 102, 0.45)' : undefined, color: network === net ? '#ffd166' : undefined, width: '100%', marginBottom: 6, textAlign: 'left' }}>
-            {net === 'mainnet' ? 'Mainnet (mc-rpc.tensoriumlabs.com)' : 'Custom RPC'}
+            {net === 'mainnet' ? 'Mainnet (rpc.tensoriumlabs.com)' : 'Custom RPC'}
           </button>
         ))}
         {network === 'custom' && (

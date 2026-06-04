@@ -62,5 +62,5 @@ export function createRpcClient(baseUrl: string): RpcClient {
 }
 
 export const RPC_URLS: Record<string, string> = {
-  mainnet: 'https://mc-rpc.tensoriumlabs.com',
+  mainnet: 'https://rpc.tensoriumlabs.com',
 };
