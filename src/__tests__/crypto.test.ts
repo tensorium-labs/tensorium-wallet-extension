@@ -5,6 +5,8 @@ import {
   encryptPrivateKey,
   decryptPrivateKey,
   computeTxId,
+  extractAddressFromScriptPubKey,
+  scriptPubKeyFromAddress,
   signTransaction,
   hexToBytes,
   bytesToHex,
@@ -49,17 +51,26 @@ describe('encrypt / decrypt', () => {
 });
 
 describe('computeTxId', () => {
-  it('produces 32-byte result', () => {
+  it('produces 32-byte result', async () => {
+    const kp = await generateKeypair();
     const tx: WalletTx = {
       inputs: [{
         previous_output: { txid_bytes: new Array(32).fill(0), output_index: 0 },
         signature_script: [],
       }],
-      outputs: [{ value_atoms: 100, address: 'txm1test' }],
+      outputs: [{ value_atoms: 100, script_pubkey: scriptPubKeyFromAddress(kp.address) }],
       payload: Array.from(new TextEncoder().encode('payment:v1')),
     };
     const id = computeTxId(tx.inputs, tx.outputs, new Uint8Array(tx.payload));
     expect(id).toHaveLength(32);
+  });
+});
+
+describe('scriptPubKeyFromAddress', () => {
+  it('roundtrips standard p2pkh addresses', async () => {
+    const kp = await generateKeypair();
+    const scriptPubKey = scriptPubKeyFromAddress(kp.address);
+    expect(extractAddressFromScriptPubKey(scriptPubKey)).toBe(kp.address);
   });
 });
 
@@ -72,7 +83,7 @@ describe('signTransaction', () => {
         { previous_output: { txid_bytes: new Array(32).fill(0), output_index: 0 }, signature_script: [] },
         { previous_output: { txid_bytes: new Array(32).fill(1), output_index: 1 }, signature_script: [] },
       ],
-      outputs: [{ value_atoms: 50, address: kp.address }],
+      outputs: [{ value_atoms: 50, script_pubkey: scriptPubKeyFromAddress(kp.address) }],
       payload: Array.from(new TextEncoder().encode('payment:v1')),
     };
     const signed = await signTransaction(tx, privBytes);

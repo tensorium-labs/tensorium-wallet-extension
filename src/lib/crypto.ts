@@ -39,7 +39,7 @@ export interface WalletInput {
 
 export interface WalletOutput {
   value_atoms: number;
-  address: string;
+  script_pubkey: number[];
 }
 
 export interface WalletTx {
@@ -65,6 +65,46 @@ export function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+const OP_DUP = 0x76;
+const OP_HASH160 = 0xa9;
+const OP_EQUALVERIFY = 0x88;
+const OP_CHECKSIG = 0xac;
+
+export function scriptPubKeyFromAddress(address: string): number[] {
+  const { prefix, words } = bech32.decode(address);
+  if (prefix !== 'txm') {
+    throw new Error('Invalid TXM address prefix.');
+  }
+  const hash20 = bech32.fromWords(words);
+  if (hash20.length !== 20) {
+    throw new Error('Invalid TXM address payload.');
+  }
+
+  return [
+    OP_DUP,
+    OP_HASH160,
+    0x14,
+    ...hash20,
+    OP_EQUALVERIFY,
+    OP_CHECKSIG,
+  ];
+}
+
+export function extractAddressFromScriptPubKey(scriptPubKey: number[]): string | null {
+  if (
+    scriptPubKey.length === 25 &&
+    scriptPubKey[0] === OP_DUP &&
+    scriptPubKey[1] === OP_HASH160 &&
+    scriptPubKey[2] === 0x14 &&
+    scriptPubKey[23] === OP_EQUALVERIFY &&
+    scriptPubKey[24] === OP_CHECKSIG
+  ) {
+    return bech32.encode('txm', bech32.toWords(Uint8Array.from(scriptPubKey.slice(3, 23))));
+  }
+
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +236,7 @@ export function computeTxId(
     const valBuf = new Uint8Array(8);
     new DataView(valBuf.buffer).setBigUint64(0, BigInt(output.value_atoms), true); // LE
     parts.push(valBuf);
-    parts.push(new TextEncoder().encode(output.address));
+    parts.push(new Uint8Array(output.script_pubkey));
   }
   parts.push(payload);
   return doubleSha256(concatBytes(parts));
@@ -234,13 +274,18 @@ export async function signTransaction(
   const payload = new Uint8Array(tx.payload);
   const emptyInputs = tx.inputs.map((i) => ({ ...i, signature_script: [] as number[] }));
   const sigHash = computeTxId(emptyInputs, tx.outputs, payload);
-  const sig = secp256k1.sign(sigHash, privKeyBytes);
+  // Match tensorium-core/k256 behavior: ECDSA signs the transaction signature-hash
+  // as a message, which is SHA-256 hashed once more inside the signer/verifier API.
+  const ecdsaMessage = sha256(sigHash);
+  const sig = secp256k1.sign(ecdsaMessage, privKeyBytes);
   const pubKey = secp256k1.getPublicKey(privKeyBytes, true);
-  const script = JSON.stringify({
-    public_key_hex: bytesToHex(pubKey),
-    signature_hex: bytesToHex(sigToDER(sig)),
-  });
-  const scriptBytes = Array.from(new TextEncoder().encode(script));
+  const derSig = sigToDER(sig);
+  const scriptBytes = Array.from(concatBytes([
+    new Uint8Array([derSig.length]),
+    derSig,
+    new Uint8Array([pubKey.length]),
+    pubKey,
+  ]));
   const signedInputs = tx.inputs.map((i) => ({ ...i, signature_script: scriptBytes }));
   const newId = computeTxId(signedInputs, tx.outputs, payload);
   return { ...tx, inputs: signedInputs, id: Array.from(newId) };

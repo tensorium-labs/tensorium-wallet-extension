@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { loadWallet, loadNetwork, type Network } from '../../lib/storage';
-import { createRpcClient, RPC_URLS, type UtxoEntry } from '../../lib/rpc';
+import { loadWallet, loadNetwork, loadSelectedRpcUrl, type Network } from '../../lib/storage';
+import { createRpcClient, type UtxoEntry } from '../../lib/rpc';
 import { NetworkBadge } from '../components/NetworkBadge';
 import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
@@ -25,7 +25,7 @@ export function Dashboard({ onNav }: Props) {
       setAddress(wallet.address);
       const net = await loadNetwork();
       setNetwork(net);
-      const rpcUrl = RPC_URLS[net] ?? net;
+      const rpcUrl = await loadSelectedRpcUrl();
       const rpc = createRpcClient(rpcUrl);
       const { utxos } = await rpc.getUtxos(wallet.address);
       const mature = utxos.filter((u: UtxoEntry) => u.mature);

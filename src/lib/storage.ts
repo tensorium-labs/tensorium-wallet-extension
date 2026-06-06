@@ -48,3 +48,12 @@ export async function loadCustomRpc(): Promise<string> {
   const r = await chromeGet(['txm_custom_rpc']);
   return (r['txm_custom_rpc'] as string) ?? '';
 }
+
+export async function loadSelectedRpcUrl(): Promise<string> {
+  const network = await loadNetwork();
+  if (network === 'mainnet') return 'https://rpc.tensoriumlabs.com';
+
+  const customRpc = (await loadCustomRpc()).trim().replace(/\/$/, '');
+  if (!customRpc) throw new Error('Custom RPC is empty. Open Settings and save a valid RPC URL.');
+  return customRpc;
+}
