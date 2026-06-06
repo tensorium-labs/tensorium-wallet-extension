@@ -11,8 +11,26 @@ async function rpcFetch<T>(url: string, init?: RequestInit): Promise<T> {
   } catch {
     throw new RpcError('Node unreachable — check network or try again');
   }
-  if (!res.ok) throw new RpcError('Node unreachable — check network or try again');
-  return res.json() as Promise<T>;
+
+  const text = await res.text();
+  let data: unknown;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+
+  if (!res.ok) {
+    const message =
+      typeof data === 'string' && data.trim()
+        ? data.trim()
+        : typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string'
+          ? data.error
+          : `RPC request failed (${res.status})`;
+    throw new RpcError(message);
+  }
+
+  return data as T;
 }
 
 export interface HealthResponse { ok: boolean }
@@ -29,7 +47,7 @@ export interface BlockHeader {
   previous_hash?: number[]; merkle_root?: number[];
   timestamp_seconds: number; leading_zero_bits?: number; nonce?: number;
 }
-export interface TxOutput { value_atoms: number; address: string }
+export interface TxOutput { value_atoms: number; script_pubkey: number[] }
 export interface TxInput {
   previous_output: { txid: number[]; output_index: number };
   signature_script: number[];
@@ -37,12 +55,37 @@ export interface TxInput {
 export interface RpcTransaction { id: number[]; inputs: TxInput[]; outputs: TxOutput[]; payload: number[] }
 export interface BlockResponse { header: BlockHeader; transactions: RpcTransaction[] }
 export interface SendTxResponse { accepted: boolean; txid: number[]; mempool_size: number }
+export interface MempoolInfoResponse {
+  count: number;
+  fees: {
+    max_fee_atoms: number;
+    median_fee_atoms: number;
+    min_fee_atoms: number;
+    min_relay_fee_atoms: number;
+    priority_fee_atoms: number;
+    total_fee_atoms: number;
+  };
+  txids: string[];
+}
+
+export interface EstimateFeeResponse {
+  slow_atoms:       number;
+  normal_atoms:     number;
+  fast_atoms:       number;
+  congestion_level: 'low' | 'medium' | 'high';
+  mempool_count:    number;
+  slow_txm:         number;
+  normal_txm:       number;
+  fast_txm:         number;
+}
 
 export interface RpcClient {
   health(): Promise<HealthResponse>;
   getBlockCount(): Promise<BlockCountResponse>;
   getBlock(height: number): Promise<BlockResponse>;
   getUtxos(address: string): Promise<UtxosResponse>;
+  getMempoolInfo(): Promise<MempoolInfoResponse>;
+  estimateFee(): Promise<EstimateFeeResponse>;
   sendRawTransaction(tx: WalletTx): Promise<SendTxResponse>;
 }
 
@@ -51,8 +94,13 @@ export function createRpcClient(baseUrl: string): RpcClient {
   return {
     health: () => rpcFetch(`${base}/health`),
     getBlockCount: () => rpcFetch(`${base}/getblockcount`),
-    getBlock: (h) => rpcFetch(`${base}/getblock/${h}`),
+    getBlock: async (h) => {
+      const raw = await rpcFetch<BlockResponse | { block: BlockResponse }>(`${base}/getblock/${h}`);
+      return 'block' in raw ? raw.block : raw;
+    },
     getUtxos: (addr) => rpcFetch(`${base}/getutxos/${encodeURIComponent(addr)}`),
+    getMempoolInfo: () => rpcFetch(`${base}/getmempoolinfo`),
+    estimateFee: () => rpcFetch(`${base}/estimatefee`),
     sendRawTransaction: (tx) => rpcFetch(`${base}/sendrawtransaction`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
