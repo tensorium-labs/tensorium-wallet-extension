@@ -245,7 +245,7 @@ export function Send({ onBack }: Props) {
         <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
           {(['slow', 'normal', 'fast'] as const).map((tier) => {
             const atoms = feeEstimate?.[`${tier}_atoms` as keyof EstimateFeeResponse] as number
-              ?? (tier === 'slow' ? 10_000 : tier === 'normal' ? 20_000 : 100_000);
+              ?? (tier === 'slow' ? MIN_RELAY : tier === 'normal' ? MIN_RELAY * 2 : MIN_RELAY * 10);
             const active = feePreset === tier;
             return (
               <button
