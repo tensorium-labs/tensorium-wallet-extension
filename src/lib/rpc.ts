@@ -69,14 +69,14 @@ export interface MempoolInfoResponse {
 }
 
 export interface EstimateFeeResponse {
-  slow_atoms:       number;
-  normal_atoms:     number;
-  fast_atoms:       number;
+  slow_atoms: number;
+  normal_atoms: number;
+  fast_atoms: number;
   congestion_level: 'low' | 'medium' | 'high';
-  mempool_count:    number;
-  slow_txm:         number;
-  normal_txm:       number;
-  fast_txm:         number;
+  mempool_count: number;
+  slow_txm: number;
+  normal_txm: number;
+  fast_txm: number;
 }
 
 export interface RpcClient {
