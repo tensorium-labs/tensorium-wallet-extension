@@ -8,6 +8,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 
 interface Props { onBack: () => void }
 type SendStep = 'form' | 'confirm' | 'success';
+type FeePreset = 'slow' | 'normal' | 'fast' | 'custom';
 const MEMPOOL_CONFLICT_HINT = 'This spend is already pending in the mempool. Wait for confirmation before sending again.';
 
 function isValidTxmAddress(addr: string): boolean {
@@ -26,11 +27,9 @@ export function Send({ onBack }: Props) {
   const [balance, setBalance] = useState(0);
   const [utxos, setUtxos] = useState<UtxoEntry[]>([]);
 
-  type FeePreset = 'slow' | 'normal' | 'fast' | 'custom';
   const [feePreset,    setFeePreset]    = useState<FeePreset>('normal');
   const [customFeeTxm, setCustomFee]   = useState('');
   const [feeEstimate,  setFeeEstimate] = useState<EstimateFeeResponse | null>(null);
-  const [showCustom,   setShowCustom]  = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -250,7 +249,7 @@ export function Send({ onBack }: Props) {
             return (
               <button
                 key={tier}
-                onClick={() => { setFeePreset(tier); setShowCustom(false); }}
+                onClick={() => setFeePreset(tier)}
                 className={`wallet-btn ${active ? 'wallet-btn--primary' : 'wallet-btn--secondary'}`}
                 style={{ flex: 1, padding: '6px 4px', fontSize: 12 }}
               >
@@ -261,13 +260,13 @@ export function Send({ onBack }: Props) {
           })}
         </div>
         <button
-          onClick={() => { setShowCustom((v) => !v); setFeePreset(showCustom ? 'normal' : 'custom'); }}
+          onClick={() => setFeePreset((prev) => prev === 'custom' ? 'normal' : 'custom')}
           className={`wallet-btn ${feePreset === 'custom' ? 'wallet-btn--primary' : 'wallet-btn--secondary'}`}
           style={{ width: '100%', fontSize: 12, padding: '5px 0' }}
         >
-          Custom {showCustom ? '▲' : '▾'}
+          Custom {feePreset === 'custom' ? '▲' : '▾'}
         </button>
-        {showCustom && (
+        {feePreset === 'custom' && (
           <div style={{ marginTop: 8 }}>
             <input
               type="number"
