@@ -73,7 +73,10 @@ const OP_EQUALVERIFY = 0x88;
 const OP_CHECKSIG = 0xac;
 
 export function scriptPubKeyFromAddress(address: string): number[] {
-  const { prefix, words } = bech32.decode(address);
+  // @scure/base types the input as a `${prefix}1${data}` template literal;
+  // a plain `string` is too loose. A bech32 address always contains the '1'
+  // separator, and the prefix is validated immediately below.
+  const { prefix, words } = bech32.decode(address as `${string}1${string}`);
   if (prefix !== 'txm') {
     throw new Error('Invalid TXM address prefix.');
   }
