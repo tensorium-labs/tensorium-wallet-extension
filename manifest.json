@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tensorium Wallet",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tensorium (TXM) blockchain wallet",
   "action": {
     "default_popup": "src/popup/index.html",
@@ -15,20 +15,34 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://mc-rpc.tensoriumlabs.com/*",
     "https://*.tensoriumlabs.com/*"
   ],
-  "content_scripts": [{
-    "matches": ["https://*.tensoriumlabs.com/*"],
-    "js": ["content.js"],
-    "run_at": "document_start"
-  }],
-  "web_accessible_resources": [{
-    "resources": ["inpage.js"],
-    "matches": ["https://*.tensoriumlabs.com/*"]
-  }],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.tensoriumlabs.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inpage.js"
+      ],
+      "matches": [
+        "https://*.tensoriumlabs.com/*"
+      ]
+    }
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
