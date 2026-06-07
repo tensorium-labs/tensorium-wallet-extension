@@ -7,9 +7,10 @@ import { Dashboard } from './pages/Dashboard';
 import { Send } from './pages/Send';
 import { History } from './pages/History';
 import { Settings } from './pages/Settings';
+import { Vesting } from './pages/Vesting';
 import { BridgeConfirm, type BridgeReq } from './pages/BridgeConfirm';
 
-export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge';
+export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge' | 'vesting';
 
 export default function App() {
   const [page, setPage] = useState<Page>('locked');
@@ -59,6 +60,7 @@ export default function App() {
     if (page === 'send') return <Send onBack={() => nav('dashboard')} />;
     if (page === 'history') return <History onBack={() => nav('dashboard')} />;
     if (page === 'settings') return <Settings onBack={() => nav('dashboard')} onLogout={() => nav('locked')} />;
+    if (page === 'vesting') return <Vesting onBack={() => nav('dashboard')} />;
     return <Dashboard onNav={nav} />;
   })();
 

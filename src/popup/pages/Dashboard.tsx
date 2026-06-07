@@ -102,6 +102,7 @@ export function Dashboard({ onNav }: Props) {
       <div className="wallet-pill-nav">
         <button onClick={() => onNav('send')} className="wallet-btn wallet-btn--primary">Send</button>
         <button onClick={() => onNav('history')} className="wallet-btn wallet-btn--secondary">History</button>
+        <button onClick={() => onNav('vesting')} className="wallet-btn wallet-btn--secondary">Vesting</button>
         <button onClick={() => onNav('settings')} className="wallet-btn wallet-btn--secondary">Settings</button>
       </div>
       <div className="wallet-footer-note">
