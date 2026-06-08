@@ -22,6 +22,11 @@ export function Accounts({ onBack, onLock }: Props) {
   const [addType, setAddType] = useState<'create' | 'import'>('create');
   const [pw, setPw] = useState('');
   const [importInput, setImportInput] = useState('');
+  // Cold wallets (founder/ecosystem/etc.) are often encrypted with their OWN
+  // original passphrase, not your extension's master password. This optional
+  // field decrypts the imported file; `pw` stays the master password used to
+  // verify the existing account and re-encrypt the key for storage.
+  const [sourcePw, setSourcePw] = useState('');
 
   const reload = async () => {
     setWallets(await loadWallets());
@@ -57,7 +62,22 @@ export function Accounts({ onBack, onLock }: Props) {
         if (t.length === 64 && /^[0-9a-fA-F]+$/.test(t)) privKeyHex = t.toLowerCase();
         else {
           const parsed: WalletFile = JSON.parse(t);
-          privKeyHex = await decryptPrivateKey(parsed.encrypted_private_key, pw);
+          // Try the master password first (covers files created in this same
+          // extension), then fall back to the file's own original password.
+          const candidates = sourcePw.trim() ? [sourcePw.trim(), pw] : [pw];
+          let decrypted: string | null = null;
+          for (const candidate of candidates) {
+            try { decrypted = await decryptPrivateKey(parsed.encrypted_private_key, candidate); break; }
+            catch { /* try next candidate */ }
+          }
+          if (decrypted === null) {
+            throw new Error(
+              sourcePw.trim()
+                ? 'Incorrect password for this wallet file.'
+                : "This file was encrypted with a different password than your wallet — enter the file's original password below."
+            );
+          }
+          privKeyHex = decrypted;
         }
       }
       const kp = await keypairFromPrivKeyHex(privKeyHex);
@@ -69,7 +89,7 @@ export function Accounts({ onBack, onLock }: Props) {
       addSessionKey(privKeyHex, kp.address);
       await saveSelectedIndex(idx);
       setActive(kp.address);
-      setPw(''); setImportInput(''); setMode('list');
+      setPw(''); setImportInput(''); setSourcePw(''); setMode('list');
       await reload();
     } catch (e) {
       setError(
@@ -109,10 +129,21 @@ export function Accounts({ onBack, onLock }: Props) {
           <p className="wallet-subtle" style={{ fontSize: 12, margin: 0 }}>
             New accounts use your existing wallet password, so one unlock covers all of them.
           </p>
+          {addType === 'import' && (
+            <>
+              <input type="password" placeholder="File's original password (only if different from above)"
+                value={sourcePw} onChange={(e) => setSourcePw(e.target.value)} className="wallet-input" />
+              <p className="wallet-subtle" style={{ fontSize: 12, margin: 0 }}>
+                Cold wallets (founder, ecosystem, etc.) are often encrypted with their own
+                original passphrase. Leave this blank if the file uses the same password as
+                above — fill it in only if importing fails.
+              </p>
+            </>
+          )}
           <button onClick={addAccount} disabled={busy || !pw || (addType === 'import' && !importInput)} className="wallet-btn wallet-btn--primary">
             {busy ? 'Working…' : addType === 'create' ? 'Create account' : 'Import account'}
           </button>
-          <button onClick={() => { setMode('list'); setError(''); }} className="wallet-btn wallet-btn--ghost">Cancel</button>
+          <button onClick={() => { setMode('list'); setError(''); setSourcePw(''); }} className="wallet-btn wallet-btn--ghost">Cancel</button>
         </div>
       </div>
     </div>
