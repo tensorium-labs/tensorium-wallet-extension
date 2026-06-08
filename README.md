@@ -10,7 +10,7 @@ Coming soon. Submission is under review.
 
 ### Option B — Manual install (available now)
 
-1. Download **tensorium-wallet-extension-v0.1.1.zip** from the [latest release](https://github.com/tensorium-labs/tensorium-wallet-extension/releases/latest).
+1. Download the latest **tensorium-wallet-extension-*.zip** from the [latest release](https://github.com/tensorium-labs/tensorium-wallet-extension/releases/latest).
 2. Unzip the file anywhere on your computer.
 3. Open Chrome and go to `chrome://extensions`.
 4. Enable **Developer mode** (top-right toggle).
@@ -23,13 +23,19 @@ Coming soon. Submission is under review.
 
 - Create a new Tensorium wallet (with forced backup)
 - Import existing wallet from private key or encrypted JSON
+- **Multiple accounts** — add / switch addresses instantly under one password (Accounts page)
+- **Stays unlocked** across popup open/close for the browser session — no password prompt on every click
 - View address and spendable TXM balance
 - Send TXM transactions with confirmation step
+- **Vesting** tab — view and claim OTC CLTV-vested tranches
 - Transaction history — last 200 blocks, shows sent and received
 - Network selector: Mainnet / Custom RPC
 - Export encrypted wallet JSON backup
 - Show/copy private key (requires password or active session)
 - Lock wallet
+
+> Keys are encrypted at rest (Argon2id + XChaCha20-Poly1305) and never leave your
+> browser. The unlock session is held in memory only and cleared when the browser closes.
 
 ## Networks
 
