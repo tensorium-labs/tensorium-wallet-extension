@@ -50,7 +50,7 @@ export function Onboarding({ onDone }: Props) {
     if (!createdWallet || !backupDone) return;
     const privKey = await decryptPrivateKey(createdWallet.encrypted_private_key, password);
     await saveWallet(createdWallet);
-    setSession(privKey);
+    setSession(privKey, createdWallet.address);
     onDone();
   };
 
@@ -76,7 +76,7 @@ export function Onboarding({ onDone }: Props) {
         : { version: 1, address: kp.address, public_key_hex: kp.publicKeyHex, encrypted_private_key: enc };
 
       await saveWallet(wallet);
-      setSession(privKeyHex);
+      setSession(privKeyHex, wallet.address);
       onDone();
     } catch (e) {
       setError(e instanceof SyntaxError ? 'Invalid wallet file format.' :

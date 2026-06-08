@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { loadWallet } from '../lib/storage';
-import { isUnlocked } from '../lib/session';
+import { isUnlocked, hydrateSession } from '../lib/session';
 import { Locked } from './pages/Locked';
 import { Onboarding } from './pages/Onboarding';
 import { Dashboard } from './pages/Dashboard';
@@ -8,9 +8,10 @@ import { Send } from './pages/Send';
 import { History } from './pages/History';
 import { Settings } from './pages/Settings';
 import { Vesting } from './pages/Vesting';
+import { Accounts } from './pages/Accounts';
 import { BridgeConfirm, type BridgeReq } from './pages/BridgeConfirm';
 
-export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge' | 'vesting';
+export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge' | 'vesting' | 'accounts';
 
 export default function App() {
   const [page, setPage] = useState<Page>('locked');
@@ -18,7 +19,7 @@ export default function App() {
   const [bridgeReq, setBridgeReq] = useState<BridgeReq | null>(null);
 
   useEffect(() => {
-    loadWallet().then(async (w) => {
+    hydrateSession().then(() => loadWallet()).then(async (w) => {
       if (!w) { setPage('onboarding'); setLoading(false); return; }
       if (!isUnlocked()) { setPage('locked'); setLoading(false); return; }
       // Check for a pending bridge request from the dapp provider
@@ -61,6 +62,7 @@ export default function App() {
     if (page === 'history') return <History onBack={() => nav('dashboard')} />;
     if (page === 'settings') return <Settings onBack={() => nav('dashboard')} onLogout={() => nav('locked')} />;
     if (page === 'vesting') return <Vesting onBack={() => nav('dashboard')} />;
+    if (page === 'accounts') return <Accounts onBack={() => nav('dashboard')} onLock={() => nav('locked')} />;
     return <Dashboard onNav={nav} />;
   })();
 

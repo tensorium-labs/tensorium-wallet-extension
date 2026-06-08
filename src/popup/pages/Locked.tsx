@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { loadWallet } from '../../lib/storage';
+import { loadWallets, loadSelectedIndex } from '../../lib/storage';
 import { decryptPrivateKey } from '../../lib/crypto';
-import { setSession } from '../../lib/session';
+import { setSession, addSessionKey } from '../../lib/session';
 import { BrandMark } from '../components/BrandMark';
 import { ErrorBanner } from '../components/ErrorBanner';
 
@@ -15,10 +15,22 @@ export function Locked({ onUnlocked }: Props) {
   const unlock = async () => {
     setError(''); setBusy(true);
     try {
-      const wallet = await loadWallet();
-      if (!wallet) { setError('No wallet found.'); return; }
-      const privKey = await decryptPrivateKey(wallet.encrypted_private_key, password);
-      setSession(privKey);
+      const wallets = await loadWallets();
+      if (!wallets.length) { setError('No wallet found.'); return; }
+      const sel = wallets[await loadSelectedIndex()] ?? wallets[0];
+      // Decrypt the active account (this also verifies the password).
+      const privKey = await decryptPrivateKey(sel.encrypted_private_key, password);
+      setSession(privKey, sel.address);
+      // Decrypt the rest with the same password so switching accounts is instant.
+      for (const w of wallets) {
+        if (w.address === sel.address) continue;
+        try {
+          const k = await decryptPrivateKey(w.encrypted_private_key, password);
+          addSessionKey(k, w.address);
+        } catch {
+          /* account uses a different password — unlocked individually later */
+        }
+      }
       onUnlocked();
     } catch {
       setError('Incorrect password.');

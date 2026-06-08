@@ -2,7 +2,9 @@ import type { WalletFile } from './crypto';
 
 export type Network = 'mainnet' | 'custom';
 
-const WALLET_KEY = 'txm_wallet';
+const WALLET_KEY = 'txm_wallet'; // legacy single-wallet key (migrated)
+const WALLETS_KEY = 'txm_wallets'; // WalletFile[]
+const SELECTED_KEY = 'txm_selected'; // selected account index
 const NETWORK_KEY = 'txm_network';
 
 function chromeGet(keys: string[]): Promise<Record<string, unknown>> {
@@ -24,15 +26,64 @@ function chromeRemove(keys: string[]): Promise<void> {
   );
 }
 
-export async function saveWallet(wallet: WalletFile): Promise<void> {
-  await chromeSet({ [WALLET_KEY]: wallet });
+// ── Multi-account storage ────────────────────────────────────────────────────
+// Wallets live in `txm_wallets` (an array); `txm_selected` is the active index.
+// A legacy single `txm_wallet` is migrated into the array on first read.
+
+export async function loadWallets(): Promise<WalletFile[]> {
+  const r = await chromeGet([WALLETS_KEY, WALLET_KEY]);
+  let list = r[WALLETS_KEY] as WalletFile[] | undefined;
+  if (!Array.isArray(list)) {
+    const legacy = r[WALLET_KEY] as WalletFile | undefined;
+    list = legacy ? [legacy] : [];
+    if (legacy) await chromeSet({ [WALLETS_KEY]: list });
+  }
+  return list;
 }
+export async function saveWallets(list: WalletFile[]): Promise<void> {
+  await chromeSet({ [WALLETS_KEY]: list });
+}
+export async function loadSelectedIndex(): Promise<number> {
+  const r = await chromeGet([SELECTED_KEY]);
+  const i = r[SELECTED_KEY];
+  return typeof i === 'number' ? i : 0;
+}
+export async function saveSelectedIndex(i: number): Promise<void> {
+  await chromeSet({ [SELECTED_KEY]: i });
+}
+/** Append a wallet; returns its new index. */
+export async function addWallet(wallet: WalletFile): Promise<number> {
+  const list = await loadWallets();
+  // De-dupe by address: if it already exists, just select it.
+  const existing = list.findIndex((w) => w.address === wallet.address);
+  if (existing >= 0) return existing;
+  list.push(wallet);
+  await saveWallets(list);
+  return list.length - 1;
+}
+/** Remove the wallet at `index`; clamps the selected index. */
+export async function removeWalletAt(index: number): Promise<void> {
+  const list = await loadWallets();
+  if (index < 0 || index >= list.length) return;
+  list.splice(index, 1);
+  await saveWallets(list);
+  const sel = await loadSelectedIndex();
+  if (sel >= list.length) await saveSelectedIndex(Math.max(0, list.length - 1));
+}
+
+/** Save the first wallet (used by onboarding); resets to a single-account list. */
+export async function saveWallet(wallet: WalletFile): Promise<void> {
+  await chromeSet({ [WALLETS_KEY]: [wallet], [SELECTED_KEY]: 0 });
+}
+/** The active (selected) wallet, or null. Back-compat for existing pages. */
 export async function loadWallet(): Promise<WalletFile | null> {
-  const r = await chromeGet([WALLET_KEY]);
-  return (r[WALLET_KEY] as WalletFile) ?? null;
+  const list = await loadWallets();
+  if (list.length === 0) return null;
+  const i = await loadSelectedIndex();
+  return list[i] ?? list[0];
 }
 export async function clearWallet(): Promise<void> {
-  await chromeRemove([WALLET_KEY]);
+  await chromeRemove([WALLET_KEY, WALLETS_KEY, SELECTED_KEY]);
 }
 export async function saveNetwork(network: Network): Promise<void> {
   await chromeSet({ [NETWORK_KEY]: network });

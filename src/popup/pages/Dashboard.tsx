@@ -69,6 +69,7 @@ export function Dashboard({ onNav }: Props) {
         <div className="wallet-address wallet-code">{address}</div>
         <div className="wallet-row" style={{ marginTop: 12 }}>
           <button onClick={copy} className="wallet-btn wallet-btn--secondary">{copied ? 'Copied' : 'Copy address'}</button>
+          <button onClick={() => onNav('accounts')} className="wallet-btn wallet-btn--secondary">Accounts</button>
           <button onClick={refresh} className="wallet-btn wallet-btn--ghost">Refresh</button>
         </div>
       </div>

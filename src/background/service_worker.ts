@@ -1,6 +1,9 @@
-import { clearSession } from '../lib/session';
+import { loadWallet } from '../lib/storage';
 
-chrome.runtime.onSuspend.addListener(() => { clearSession(); });
+// NOTE: the unlocked session lives in chrome.storage.session (see lib/session.ts)
+// so it deliberately survives service-worker suspensions and popup close/open —
+// the user is not re-prompted for the password on every click. It clears when the
+// browser fully closes (chrome.storage.session semantics).
 
 // ─── Dapp request handler ─────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -15,14 +18,12 @@ async function handleDapp(msg: { method: string; params: Record<string, unknown>
   const { method, params } = msg;
 
   if (method === 'getAddress') {
-    const data = await chrome.storage.local.get('txm_wallet');
-    const wallet = data['txm_wallet'] as { address: string } | undefined;
+    const wallet = await loadWallet();
     return wallet?.address ?? null;
   }
 
   if (method === 'requestAccounts') {
-    const data = await chrome.storage.local.get('txm_wallet');
-    const wallet = data['txm_wallet'] as { address: string } | undefined;
+    const wallet = await loadWallet();
     return wallet ? [wallet.address] : [];
   }
 

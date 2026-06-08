@@ -71,11 +71,11 @@ describe('storage', () => {
 
 describe('session', () => {
   it('stores and retrieves private key', () => {
-    setSession('deadbeef'.repeat(8));
+    setSession('deadbeef'.repeat(8), 'txm1test');
     expect(getSession()).toBe('deadbeef'.repeat(8));
   });
   it('clearSession removes key', () => {
-    setSession('abc');
+    setSession('abc', 'txm1test');
     clearSession();
     expect(getSession()).toBeNull();
   });
