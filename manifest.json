@@ -19,7 +19,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://mc-rpc.tensoriumlabs.com/*",
+    "https://rpc.tensoriumlabs.com/*",
     "https://*.tensoriumlabs.com/*"
   ],
   "content_scripts": [

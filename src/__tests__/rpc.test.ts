@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node';
 import { createRpcClient } from '../lib/rpc';
 import type { WalletTx } from '../lib/crypto';
 
-const BASE = 'https://mc-rpc.tensoriumlabs.com';
+const BASE = 'https://rpc.tensoriumlabs.com';
 
 const server = setupServer(
   http.get(`${BASE}/health`, () => HttpResponse.json({ ok: true })),

@@ -100,7 +100,7 @@ Without this permission, the extension cannot persist wallet state across browse
 ### Host permissions
 
 - ``
-- `https://mc-rpc.tensoriumlabs.com/*`
+- `https://rpc.tensoriumlabs.com/*`
 
 Used to:
 

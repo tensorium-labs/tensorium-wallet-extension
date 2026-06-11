@@ -41,7 +41,7 @@ Coming soon. Submission is under review.
 
 | Network | RPC |
 |---------|-----|
-| Mainnet | `https://mc-rpc.tensoriumlabs.com` |
+| Mainnet | `https://rpc.tensoriumlabs.com` |
 | Custom RPC | user-defined |
 
 ## Build from source
