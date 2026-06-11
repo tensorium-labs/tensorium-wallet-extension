@@ -79,7 +79,7 @@
 
     const mockBlocks = {
       3: {
-        header: { chain_id: "tensorium-mainnet-candidate-0", height: 3, timestamp_seconds: 1710000000 },
+        header: { chain_id: "tensorium-mainnet", height: 3, timestamp_seconds: 1710000000 },
         transactions: [
           {
             id: [1,2,3],
@@ -93,7 +93,7 @@
         ]
       },
       2: {
-        header: { chain_id: "tensorium-mainnet-candidate-0", height: 2, timestamp_seconds: 1709999800 },
+        header: { chain_id: "tensorium-mainnet", height: 2, timestamp_seconds: 1709999800 },
         transactions: [
           {
             id: [7,8,9],
@@ -105,8 +105,8 @@
           }
         ]
       },
-      1: { header: { chain_id: "tensorium-mainnet-candidate-0", height: 1, timestamp_seconds: 1709999600 }, transactions: [] },
-      0: { header: { chain_id: "tensorium-mainnet-candidate-0", height: 0, timestamp_seconds: 1709999400 }, transactions: [] }
+      1: { header: { chain_id: "tensorium-mainnet", height: 1, timestamp_seconds: 1709999600 }, transactions: [] },
+      0: { header: { chain_id: "tensorium-mainnet", height: 0, timestamp_seconds: 1709999400 }, transactions: [] }
     };
 
     window.fetch = async (url, init) => {
@@ -140,7 +140,7 @@
       }
 
       if (href.endsWith("/getblockcount")) {
-        return new Response(JSON.stringify({ blocks: 4, chain_id: "tensorium-mainnet-candidate-0", height: 3 }), {
+        return new Response(JSON.stringify({ blocks: 4, chain_id: "tensorium-mainnet", height: 3 }), {
           status: 200,
           headers: { "Content-Type": "application/json" }
         });

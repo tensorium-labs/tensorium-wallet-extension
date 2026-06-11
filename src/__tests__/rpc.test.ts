@@ -9,9 +9,9 @@ const BASE = 'https://mc-rpc.tensoriumlabs.com';
 const server = setupServer(
   http.get(`${BASE}/health`, () => HttpResponse.json({ ok: true })),
   http.get(`${BASE}/getblockcount`, () =>
-    HttpResponse.json({ blocks: 5, chain_id: 'tensorium-mainnet-candidate-0', height: 4 })),
+    HttpResponse.json({ blocks: 5, chain_id: 'tensorium-mainnet', height: 4 })),
   http.get(`${BASE}/getblock/2`, () =>
-    HttpResponse.json({ hash: [9, 9, 9], block: { header: { height: 2, chain_id: 'tensorium-mainnet-candidate-0', timestamp_seconds: 1000 }, transactions: [] } })),
+    HttpResponse.json({ hash: [9, 9, 9], block: { header: { height: 2, chain_id: 'tensorium-mainnet', timestamp_seconds: 1000 }, transactions: [] } })),
   http.get(`${BASE}/getutxos/txm1test`, () =>
     HttpResponse.json({ address: 'txm1test', tip_height: 4, utxo_count: 1, utxos: [
       { txid: 'aa'.repeat(32), txid_bytes: new Array(32).fill(0xaa), output_index: 0,
