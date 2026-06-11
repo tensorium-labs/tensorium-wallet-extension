@@ -45,12 +45,12 @@ export function Locked({ onUnlocked }: Props) {
         <div className="wallet-brand" style={{ marginBottom: 14 }}>
           <BrandMark />
           <div className="wallet-brand-copy">
-            <div className="wallet-eyebrow">Self-custody TXM wallet</div>
+            <div className="wallet-eyebrow">Mainnet v1 access</div>
             <h2>Unlock Tensorium Wallet</h2>
           </div>
         </div>
         <p className="wallet-subtle" style={{ marginBottom: 14 }}>
-          Enter your password to decrypt the local wallet and restore the active session.
+          Enter your password to decrypt the local wallet and restore the active TXM session for the reset TensorHash v1 chain.
         </p>
       {error && <ErrorBanner message={error} />}
         <div className="wallet-stack">

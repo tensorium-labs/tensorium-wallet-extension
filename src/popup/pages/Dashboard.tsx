@@ -57,15 +57,42 @@ export function Dashboard({ onNav }: Props) {
         <div className="wallet-brand">
           <BrandMark />
           <div className="wallet-brand-copy">
-            <div className="wallet-eyebrow">Wallet overview</div>
+            <div className="wallet-eyebrow">Mainnet v1 vault</div>
             <h2>Tensorium Wallet</h2>
           </div>
         </div>
         <NetworkBadge network={network} />
       </div>
       {error && <ErrorBanner message={error} onRetry={refresh} />}
-      <div className="wallet-surface" style={{ padding: 16 }}>
-        <div className="wallet-section-label">Current wallet</div>
+      <div className="wallet-surface wallet-hero">
+        <div className="wallet-hero__head">
+          <div>
+            <div className="wallet-section-label">Spendable balance</div>
+            <div className="wallet-balance wallet-balance--accent">
+              {balance === null ? '—' : formatTxm(balance)}
+            </div>
+          </div>
+          <div className="wallet-hero__stamp">
+            <span className="wallet-chip__dot"></span>
+            {network === 'mainnet' ? 'Mainnet v1' : 'Custom RPC'}
+          </div>
+        </div>
+        <div className="wallet-hero__subtle">
+          Fresh-chain TXM wallet for TensorHash v1. Mature UTXOs are spendable now, while mining rewards stay pending until maturity.
+        </div>
+        <div className="wallet-kpi-grid wallet-kpi-grid--hero">
+          <div className="wallet-stat wallet-stat--accent">
+            <div className="wallet-stat__label">Pending Rewards</div>
+            <div className="wallet-stat__value">{pendingBalance > 0 ? formatTxm(pendingBalance) : '0.00000000 TXM'}</div>
+          </div>
+          <div className="wallet-stat">
+            <div className="wallet-stat__label">Pending UTXOs</div>
+            <div className="wallet-stat__value">{pendingCount}</div>
+          </div>
+        </div>
+      </div>
+      <div className="wallet-surface wallet-panel">
+        <div className="wallet-section-label">Active address</div>
         <div className="wallet-address wallet-code">{address}</div>
         <div className="wallet-row" style={{ marginTop: 12 }}>
           <button onClick={copy} className="wallet-btn wallet-btn--secondary">{copied ? 'Copied' : 'Copy address'}</button>
@@ -73,12 +100,9 @@ export function Dashboard({ onNav }: Props) {
           <button onClick={refresh} className="wallet-btn wallet-btn--ghost">Refresh</button>
         </div>
       </div>
-      <div className="wallet-surface" style={{ padding: 16 }}>
-        <div className="wallet-section-label">Spendable balance</div>
-        <div className="wallet-balance wallet-balance--accent">
-          {balance === null ? '—' : formatTxm(balance)}
-        </div>
-        <div className="wallet-kpi-grid" style={{ marginTop: 14 }}>
+      <div className="wallet-surface wallet-panel">
+        <div className="wallet-section-label">Network posture</div>
+        <div className="wallet-kpi-grid" style={{ marginTop: 0 }}>
           <div className="wallet-stat">
             <div className="wallet-stat__label">Network</div>
             <div className="wallet-stat__value">{network === 'mainnet' ? 'Mainnet' : 'Custom RPC'}</div>
@@ -90,7 +114,7 @@ export function Dashboard({ onNav }: Props) {
         </div>
       </div>
       {pendingBalance > 0 && (
-        <div className="wallet-card">
+        <div className="wallet-card wallet-card--warning">
           <div className="wallet-section-label">Pending mining rewards</div>
           <div className="wallet-balance" style={{ fontSize: 22 }}>
             {formatTxm(pendingBalance)}
@@ -107,7 +131,7 @@ export function Dashboard({ onNav }: Props) {
         <button onClick={() => onNav('settings')} className="wallet-btn wallet-btn--secondary">Settings</button>
       </div>
       <div className="wallet-footer-note">
-        Tensorium Wallet currently shows spendable mature balance from RPC UTXOs. Coinbase mining rewards stay pending until maturity.
+        Tensorium Wallet reads balance from RPC UTXOs on the reset `tensorium-mainnet` chain. Coinbase rewards stay pending until maturity.
       </div>
     </div>
   );

@@ -95,25 +95,30 @@ export function Onboarding({ onDone }: Props) {
 
   if (step === 'choose') return (
     <div className="wallet-page wallet-page--centered">
-      <div className="wallet-surface" style={{ padding: 22 }}>
+      <div className="wallet-surface wallet-onboard-shell">
+        <div className="wallet-orbit wallet-orbit--hero"></div>
         <div className="wallet-brand" style={{ marginBottom: 12 }}>
           <BrandMark />
           <div className="wallet-brand-copy">
-            <div className="wallet-eyebrow">Welcome</div>
+            <div className="wallet-eyebrow">TensorHash v1</div>
             <h2>Tensorium Wallet</h2>
           </div>
         </div>
         <p className="wallet-subtle" style={{ marginBottom: 16 }}>
-          Create a fresh wallet or import an existing TXM key. You stay in control of the private key at all times.
+          New chain, clean start. Create a fresh TXM vault for mainnet v1 or import an existing key while keeping private-key control fully local.
         </p>
+        <div className="wallet-banner">
+          <div className="wallet-banner__title">Reset chain ready</div>
+          <div className="wallet-banner__text">Optimized for `tensorium-mainnet` on TensorHash v1 with canonical RPC defaults and session-only unlock.</div>
+        </div>
         <div className="wallet-kpi-grid" style={{ marginBottom: 16 }}>
           <div className="wallet-stat">
             <div className="wallet-stat__label">Mode</div>
             <div className="wallet-stat__value">Self-custody</div>
           </div>
           <div className="wallet-stat">
-            <div className="wallet-stat__label">Storage</div>
-            <div className="wallet-stat__value">Encrypted local</div>
+            <div className="wallet-stat__label">Chain</div>
+            <div className="wallet-stat__value">Mainnet v1</div>
           </div>
         </div>
         <div className="wallet-stack">
@@ -127,6 +132,7 @@ export function Onboarding({ onDone }: Props) {
   if (step === 'create-password') return (
     <div className="wallet-page wallet-page--centered">
       <div className="wallet-surface" style={{ padding: 22 }}>
+      <div className="wallet-eyebrow">Create secure vault</div>
       <h2 style={{ margin: 0, fontSize: 20 }}>Set Wallet Password</h2>
       <p className="wallet-subtle" style={{ marginTop: 6, marginBottom: 10 }}>
         This password encrypts your local wallet backup and is required to unlock the extension.
@@ -149,6 +155,7 @@ export function Onboarding({ onDone }: Props) {
   if (step === 'create-backup') return (
     <div className="wallet-page wallet-page--centered">
       <div className="wallet-surface" style={{ padding: 22 }}>
+        <div className="wallet-eyebrow">Mandatory backup</div>
         <h2 style={{ margin: 0, fontSize: 20 }}>Backup Your Wallet</h2>
         <p className="wallet-subtle" style={{ marginTop: 6 }}>
           Download the encrypted wallet file now. Losing both the password and backup means permanent loss of access.
@@ -170,6 +177,7 @@ export function Onboarding({ onDone }: Props) {
   return (
     <div className="wallet-page wallet-page--centered">
       <div className="wallet-surface" style={{ padding: 22 }}>
+      <div className="wallet-eyebrow">Import vault</div>
       <h2 style={{ margin: 0, fontSize: 20 }}>Import Wallet</h2>
       <p className="wallet-subtle" style={{ marginTop: 6, marginBottom: 10 }}>
         Paste a 64-character private key or wallet JSON backup, then set a new local password for this browser.

@@ -38,10 +38,11 @@ export default function App() {
   if (loading) return (
     <div className="app-shell wallet-loading">
       <div className="wallet-surface wallet-loading-card">
+        <div className="wallet-orbit"></div>
         <div className="wallet-loading-spinner"></div>
-        <div className="wallet-eyebrow">Tensorium Wallet</div>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Preparing secure session</div>
-        <div className="wallet-subtle">Loading wallet state and selecting the right flow.</div>
+        <div className="wallet-eyebrow">TensorHash v1</div>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Preparing mainnet vault</div>
+        <div className="wallet-subtle">Loading wallet state, active account, and the right secure flow for TXM mainnet v1.</div>
       </div>
     </div>
   );
