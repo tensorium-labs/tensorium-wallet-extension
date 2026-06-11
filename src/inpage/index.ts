@@ -30,5 +30,8 @@
     requestAccounts: () => request('requestAccounts'),
     sendTransaction: (to: string, amount_atoms: number) =>
       request('sendTransaction', { to, amount_atoms }),
+    signAssetTx: (unsignedTx: unknown, summary: unknown) =>
+      request('signAssetTx', { unsignedTx, summary }),
+    getAssets: (address: string) => request('getAssets', { address }),
   };
 })();
