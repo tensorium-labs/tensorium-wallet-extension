@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { loadWallet } from '../lib/storage';
-import { isUnlocked, hydrateSession } from '../lib/session';
+import { ensureMainnetV1Reset, loadWallet } from '../lib/storage';
+import { clearSession, isUnlocked, hydrateSession } from '../lib/session';
 import { Locked } from './pages/Locked';
 import { Onboarding } from './pages/Onboarding';
 import { Dashboard } from './pages/Dashboard';
@@ -19,7 +19,13 @@ export default function App() {
   const [bridgeReq, setBridgeReq] = useState<BridgeReq | null>(null);
 
   useEffect(() => {
-    hydrateSession().then(() => loadWallet()).then(async (w) => {
+    ensureMainnetV1Reset()
+      .then((didReset) => {
+        if (didReset) clearSession();
+        return hydrateSession();
+      })
+      .then(() => loadWallet())
+      .then(async (w) => {
       if (!w) { setPage('onboarding'); setLoading(false); return; }
       if (!isUnlocked()) { setPage('locked'); setLoading(false); return; }
       // Check for a pending bridge request from the dapp provider

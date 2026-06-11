@@ -6,6 +6,8 @@ const WALLET_KEY = 'txm_wallet'; // legacy single-wallet key (migrated)
 const WALLETS_KEY = 'txm_wallets'; // WalletFile[]
 const SELECTED_KEY = 'txm_selected'; // selected account index
 const NETWORK_KEY = 'txm_network';
+const CUSTOM_RPC_KEY = 'txm_custom_rpc';
+const MAINNET_V1_RESET_KEY = 'txm_mainnet_v1_reset_done';
 
 function chromeGet(keys: string[]): Promise<Record<string, unknown>> {
   return new Promise((resolve) =>
@@ -85,6 +87,24 @@ export async function loadWallet(): Promise<WalletFile | null> {
 export async function clearWallet(): Promise<void> {
   await chromeRemove([WALLET_KEY, WALLETS_KEY, SELECTED_KEY]);
 }
+/**
+ * One-time relaunch reset for TensorHash v1 / `tensorium-mainnet`.
+ * Old local wallets and custom RPC selections must not silently carry over
+ * into the fresh-chain extension experience.
+ *
+ * Returns true when a reset was applied during this call.
+ */
+export async function ensureMainnetV1Reset(): Promise<boolean> {
+  const r = await chromeGet([MAINNET_V1_RESET_KEY]);
+  if (r[MAINNET_V1_RESET_KEY] === true) return false;
+
+  await chromeRemove([WALLET_KEY, WALLETS_KEY, SELECTED_KEY, CUSTOM_RPC_KEY]);
+  await chromeSet({
+    [NETWORK_KEY]: 'mainnet',
+    [MAINNET_V1_RESET_KEY]: true,
+  });
+  return true;
+}
 export async function saveNetwork(network: Network): Promise<void> {
   await chromeSet({ [NETWORK_KEY]: network });
 }
@@ -93,11 +113,11 @@ export async function loadNetwork(): Promise<Network> {
   return (r[NETWORK_KEY] as Network) ?? 'mainnet';
 }
 export async function saveCustomRpc(url: string): Promise<void> {
-  await chromeSet({ txm_custom_rpc: url });
+  await chromeSet({ [CUSTOM_RPC_KEY]: url });
 }
 export async function loadCustomRpc(): Promise<string> {
-  const r = await chromeGet(['txm_custom_rpc']);
-  return (r['txm_custom_rpc'] as string) ?? '';
+  const r = await chromeGet([CUSTOM_RPC_KEY]);
+  return (r[CUSTOM_RPC_KEY] as string) ?? '';
 }
 
 export async function loadSelectedRpcUrl(): Promise<string> {

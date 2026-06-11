@@ -21,7 +21,7 @@ vi.stubGlobal('chrome', {
   },
 });
 
-import { saveWallet, loadWallet, clearWallet, saveNetwork, loadNetwork, saveCustomRpc, loadSelectedRpcUrl } from '../lib/storage';
+import { saveWallet, loadWallet, clearWallet, saveNetwork, loadNetwork, saveCustomRpc, loadSelectedRpcUrl, ensureMainnetV1Reset } from '../lib/storage';
 import { clearSession, setSession, getSession } from '../lib/session';
 
 beforeEach(() => { for (const k of Object.keys(store)) delete store[k]; });
@@ -66,6 +66,20 @@ describe('storage', () => {
   it('throws if custom rpc is empty', async () => {
     await saveNetwork('custom');
     await expect(loadSelectedRpcUrl()).rejects.toThrow('Custom RPC is empty');
+  });
+  it('applies one-time mainnet v1 reset to old local state', async () => {
+    await saveWallet(fakeWallet);
+    await saveNetwork('custom');
+    await saveCustomRpc('https://example-rpc.test');
+
+    expect(await ensureMainnetV1Reset()).toBe(true);
+    expect(await loadWallet()).toBeNull();
+    expect(await loadNetwork()).toBe('mainnet');
+    await expect(loadSelectedRpcUrl()).resolves.toBe('https://rpc.tensoriumlabs.com');
+
+    await saveWallet(fakeWallet);
+    expect(await ensureMainnetV1Reset()).toBe(false);
+    expect(await loadWallet()).toEqual(fakeWallet);
   });
 });
 
