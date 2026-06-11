@@ -33,6 +33,17 @@ async function handleDapp(msg: { method: string; params: Record<string, unknown>
     return await pendSendTransaction(to, amount_atoms);
   }
 
+  if (method === 'signAssetTx') {
+    const unsignedTx = params['unsignedTx'];
+    const summary = params['summary'];
+    return await pendSignAssetTx(unsignedTx, summary);
+  }
+
+  if (method === 'getAssets') {
+    const address = params['address'] as string;
+    return await fetchAssets(address);
+  }
+
   throw new Error(`Unknown dapp method: ${method}`);
 }
 
@@ -69,3 +80,43 @@ interface BridgeReq {
 }
 
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
+
+async function pendSignAssetTx(unsignedTx: unknown, summary: unknown): Promise<string> {
+  const reqId = Date.now().toString();
+  await (chrome.storage.session as any).set({
+    txm_asset_req: { reqId, unsignedTx, summary, status: 'pending' }
+  });
+  await chrome.action.setBadgeText({ text: '1' });
+  await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+
+  const deadline = Date.now() + 10 * 60 * 1000;
+  while (Date.now() < deadline) {
+    await sleep(600);
+    const data = await (chrome.storage.session as any).get('txm_asset_req');
+    const req = data['txm_asset_req'] as AssetReq | undefined;
+    if (!req || req.reqId !== reqId || req.status === 'pending') continue;
+    if (req.status === 'confirmed') return req.txid as string;
+    throw new Error(req.error ?? 'Transaction rejected');
+  }
+
+  await (chrome.storage.session as any).remove('txm_asset_req');
+  await chrome.action.setBadgeText({ text: '' });
+  throw new Error('Confirmation timed out — please try again');
+}
+
+interface AssetReq {
+  reqId: string;
+  unsignedTx: unknown;
+  summary: unknown;
+  status: 'pending' | 'confirmed' | 'rejected';
+  txid?: string;
+  error?: string;
+}
+
+async function fetchAssets(address: string): Promise<{ fungible: unknown[]; nfts: unknown[] }> {
+  const indexerBase = 'https://marketplace.tensoriumlabs.com/api';
+  const resp = await fetch(`${indexerBase}/balance/${address}`);
+  if (!resp.ok) throw new Error(`indexer error: ${resp.status}`);
+  const data = await resp.json();
+  return { fungible: data.fungible ?? [], nfts: data.nfts ?? [] };
+}
