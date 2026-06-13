@@ -11,14 +11,16 @@ import { Vesting } from './pages/Vesting';
 import { Accounts } from './pages/Accounts';
 import { BridgeConfirm, type BridgeReq } from './pages/BridgeConfirm';
 import { SignAssetTx, type AssetReq } from './pages/SignAssetTx';
+import { SignAssetTxPartial, type PartialReq } from './pages/SignAssetTxPartial';
 
-export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge' | 'vesting' | 'accounts' | 'asset-tx';
+export type Page = 'locked' | 'onboarding' | 'dashboard' | 'send' | 'history' | 'settings' | 'bridge' | 'vesting' | 'accounts' | 'asset-tx' | 'asset-partial';
 
 export default function App() {
   const [page, setPage] = useState<Page>('locked');
   const [loading, setLoading] = useState(true);
   const [bridgeReq, setBridgeReq] = useState<BridgeReq | null>(null);
   const [assetReq, setAssetReq] = useState<AssetReq | null>(null);
+  const [partialReq, setPartialReq] = useState<PartialReq | null>(null);
 
   useEffect(() => {
     ensureMainnetV1Reset()
@@ -31,15 +33,19 @@ export default function App() {
       if (!w) { setPage('onboarding'); setLoading(false); return; }
       if (!isUnlocked()) { setPage('locked'); setLoading(false); return; }
       // Check for a pending bridge request from the dapp provider
-      const data = await (chrome.storage.session as any).get(['txm_bridge_req', 'txm_asset_req']);
+      const data = await (chrome.storage.session as any).get(['txm_bridge_req', 'txm_asset_req', 'txm_partial_req']);
       const req = data['txm_bridge_req'] as BridgeReq | undefined;
       const aReq = data['txm_asset_req'] as AssetReq | undefined;
+      const pReq = data['txm_partial_req'] as PartialReq | undefined;
       if (req?.status === 'pending') {
         setBridgeReq(req);
         setPage('bridge');
       } else if (aReq?.status === 'pending') {
         setAssetReq(aReq);
         setPage('asset-tx');
+      } else if (pReq?.status === 'pending') {
+        setPartialReq(pReq);
+        setPage('asset-partial');
       } else {
         setPage('dashboard');
       }
@@ -65,15 +71,18 @@ export default function App() {
     if (page === 'onboarding') return <Onboarding onDone={() => nav('dashboard')} />;
     if (page === 'locked') return <Locked onUnlocked={async () => {
       // After unlock, check for pending bridge or asset-tx request
-      const data = await (chrome.storage.session as any).get(['txm_bridge_req', 'txm_asset_req']);
+      const data = await (chrome.storage.session as any).get(['txm_bridge_req', 'txm_asset_req', 'txm_partial_req']);
       const req = data['txm_bridge_req'] as BridgeReq | undefined;
       const aReq = data['txm_asset_req'] as AssetReq | undefined;
+      const pReq = data['txm_partial_req'] as PartialReq | undefined;
       if (req?.status === 'pending') { setBridgeReq(req); nav('bridge'); }
       else if (aReq?.status === 'pending') { setAssetReq(aReq); nav('asset-tx'); }
+      else if (pReq?.status === 'pending') { setPartialReq(pReq); nav('asset-partial'); }
       else nav('dashboard');
     }} />;
     if (page === 'bridge' && bridgeReq) return <BridgeConfirm req={bridgeReq} onDone={() => nav('dashboard')} />;
     if (page === 'asset-tx' && assetReq) return <SignAssetTx req={assetReq} onDone={() => nav('dashboard')} />;
+    if (page === 'asset-partial' && partialReq) return <SignAssetTxPartial req={partialReq} onDone={() => nav('dashboard')} />;
     if (page === 'send') return <Send onBack={() => nav('dashboard')} />;
     if (page === 'history') return <History onBack={() => nav('dashboard')} />;
     if (page === 'settings') return <Settings onBack={() => nav('dashboard')} onLogout={() => nav('locked')} />;
