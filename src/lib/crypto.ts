@@ -293,3 +293,46 @@ export async function signTransaction(
   const newId = computeTxId(signedInputs, tx.outputs, payload);
   return { ...tx, inputs: signedInputs, id: Array.from(newId) };
 }
+
+// ---------------------------------------------------------------------------
+// Marketplace M2 — signMessage + partial asset-tx signing
+// ---------------------------------------------------------------------------
+
+// Sign an arbitrary message for off-chain auth (listing/accept/cancel on the
+// order-relay). Signs sha256(utf8(message)) — matches the relay's sig.js which
+// verifies secp.verify(sig, sha256(message), pubkey). Returns DER hex + pubkey.
+export async function signMessage(
+  message: string,
+  privKeyBytes: Uint8Array
+): Promise<{ pubkey: string; sig: string }> {
+  const h = sha256(new TextEncoder().encode(message));
+  const sig = secp256k1.sign(h, privKeyBytes);
+  const pubKey = secp256k1.getPublicKey(privKeyBytes, true);
+  return { pubkey: bytesToHex(pubKey), sig: bytesToHex(sigToDER(sig)) };
+}
+
+// Partial signer for 2-of-2 asset settlement: stamps ONLY the given input
+// indices with this key's signature, leaves all other inputs untouched, and does
+// NOT broadcast or set a final id (the tx is not yet complete). The sighash is
+// computed over all-inputs-emptied (matching signTransaction), so buyer (inputs
+// 1..) and seller (input 0) can sign independently and both remain valid.
+export async function signAssetTxInputs(
+  tx: WalletTx,
+  privKeyBytes: Uint8Array,
+  inputIndices: number[]
+): Promise<WalletTx> {
+  const payload = new Uint8Array(tx.payload);
+  const emptyInputs = tx.inputs.map((i) => ({ ...i, signature_script: [] as number[] }));
+  const sigHash = computeTxId(emptyInputs, tx.outputs, payload);
+  const sig = secp256k1.sign(sha256(sigHash), privKeyBytes);
+  const pubKey = secp256k1.getPublicKey(privKeyBytes, true);
+  const derSig = sigToDER(sig);
+  const scriptBytes = Array.from(concatBytes([
+    new Uint8Array([derSig.length]), derSig,
+    new Uint8Array([pubKey.length]), pubKey,
+  ]));
+  const want = new Set(inputIndices);
+  const inputs = tx.inputs.map((inp, idx) =>
+    want.has(idx) ? { ...inp, signature_script: scriptBytes } : { ...inp });
+  return { ...tx, inputs, payload: Array.from(payload) };
+}
