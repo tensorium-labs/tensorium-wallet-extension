@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { sha256 } from '@noble/hashes/sha256';
 import * as secp from '@noble/secp256k1';
 import {
-  signMessage, signAssetTxInputs, keypairFromPrivKeyHex, hexToBytes, bytesToHex,
+  signMessage, signAssetTxInputs, keypairFromPrivKeyHex, hexToBytes, bytesToHex, computeTxId,
   type WalletTx,
 } from '../lib/crypto';
 
@@ -68,5 +68,19 @@ describe('signAssetTxInputs', () => {
     const both = await signAssetTxInputs(buyerSigned, hexToBytes('22'.repeat(32)), [0]);
     expect(both.inputs[0].signature_script.length).toBeGreaterThan(0);
     expect(both.inputs[1].signature_script.length).toBeGreaterThan(0);
+  });
+});
+
+describe('computeTxId accepts canonical `txid` (relay format) and `txid_bytes` (wallet format)', () => {
+  it('produces identical txid whether the input outpoint uses txid_bytes or txid', () => {
+    const txidBytes = Array.from({ length: 32 }, (_, i) => i + 1);
+    const outputs = [{ value_atoms: 1000, script_pubkey: [0x76, 0xa9, 0x14, ...Array(20).fill(3), 0x88, 0xac] }];
+    const payload = new Uint8Array([112, 97, 121, 109, 101, 110, 116, 58, 118, 49]); // "payment:v1"
+    const a = computeTxId([{ previous_output: { txid_bytes: txidBytes, output_index: 2 }, signature_script: [] }] as any, outputs, payload);
+    const b = computeTxId([{ previous_output: { txid: txidBytes, output_index: 2 }, signature_script: [] }] as any, outputs, payload);
+    expect(Buffer.from(b).toString('hex')).toBe(Buffer.from(a).toString('hex'));
+    // and not the empty-bytes degenerate hash
+    const empty = computeTxId([{ previous_output: { output_index: 2 }, signature_script: [] }] as any, outputs, payload);
+    expect(Buffer.from(b).toString('hex')).not.toBe(Buffer.from(empty).toString('hex'));
   });
 });

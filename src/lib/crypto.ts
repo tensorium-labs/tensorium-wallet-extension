@@ -33,7 +33,9 @@ export interface WalletFile {
 }
 
 export interface WalletInput {
-  previous_output: { txid_bytes: number[]; output_index: number };
+  // Wallet-built txs use `txid_bytes`; the node/relay canonical format uses `txid`.
+  // computeTxId accepts either (both are the 32 outpoint bytes).
+  previous_output: { txid_bytes?: number[]; txid?: number[]; output_index: number };
   signature_script: number[];
 }
 
@@ -229,7 +231,7 @@ export function computeTxId(
 ): Uint8Array {
   const parts: Uint8Array[] = [];
   for (const input of inputs) {
-    parts.push(new Uint8Array(input.previous_output.txid_bytes)); // 32 bytes
+    parts.push(new Uint8Array(input.previous_output.txid_bytes ?? input.previous_output.txid ?? [])); // 32 bytes (wallet `txid_bytes` or canonical `txid`)
     const idxBuf = new Uint8Array(4);
     new DataView(idxBuf.buffer).setUint32(0, input.previous_output.output_index, true); // LE
     parts.push(idxBuf);
