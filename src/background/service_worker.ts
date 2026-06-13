@@ -47,6 +47,19 @@ async function handleDapp(msg: { method: string; params: Record<string, unknown>
   throw new Error(`Unknown dapp method: ${method}`);
 }
 
+async function openApprovalPopup() {
+  const actionApi = chrome.action as typeof chrome.action & {
+    openPopup?: () => Promise<void>;
+  };
+  if (!actionApi.openPopup) return;
+  try {
+    await actionApi.openPopup();
+  } catch {
+    // Some Chromium builds reject openPopup from the service worker.
+    // The request is still queued in session storage and visible via badge.
+  }
+}
+
 async function pendSendTransaction(to: string, amount_atoms: number): Promise<string> {
   const reqId = Date.now().toString();
   await (chrome.storage.session as any).set({
@@ -54,6 +67,7 @@ async function pendSendTransaction(to: string, amount_atoms: number): Promise<st
   });
   await chrome.action.setBadgeText({ text: '1' });
   await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+  await openApprovalPopup();
 
   const deadline = Date.now() + 10 * 60 * 1000;
   while (Date.now() < deadline) {
@@ -88,6 +102,7 @@ async function pendSignAssetTx(unsignedTx: unknown, summary: unknown): Promise<s
   });
   await chrome.action.setBadgeText({ text: '1' });
   await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+  await openApprovalPopup();
 
   const deadline = Date.now() + 10 * 60 * 1000;
   while (Date.now() < deadline) {

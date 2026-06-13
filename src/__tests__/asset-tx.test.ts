@@ -16,4 +16,10 @@ describe('background dispatcher — asset tx methods', () => {
     expect(src).toContain("method === 'signAssetTx'");
     expect(src).toContain("method === 'getAssets'");
   });
+
+  it('attempts to open the wallet popup for pending approvals', () => {
+    const src = fs.readFileSync(path.join(__dirname, '../background/service_worker.ts'), 'utf-8');
+    expect(src).toContain('openApprovalPopup');
+    expect(src).toContain('openPopup');
+  });
 });
