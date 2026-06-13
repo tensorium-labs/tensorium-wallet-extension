@@ -28,4 +28,11 @@ describe('background dispatcher — asset tx methods', () => {
     expect(src).toContain('openApprovalPopup');
     expect(src).toContain('openPopup');
   });
+
+  it('dispatcher handles signAssetTxPartial and signMessage', () => {
+    const src = fs.readFileSync(path.join(__dirname, '../background/service_worker.ts'), 'utf-8');
+    expect(src).toContain("method === 'signAssetTxPartial'");
+    expect(src).toContain("method === 'signMessage'");
+    expect(src).toContain('pendApproval');
+  });
 });

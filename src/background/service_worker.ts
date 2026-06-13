@@ -44,6 +44,16 @@ async function handleDapp(msg: { method: string; params: Record<string, unknown>
     return await fetchAssets(address);
   }
 
+  if (method === 'signAssetTxPartial') {
+    return await pendApproval('txm_partial_req', {
+      unsignedTx: params['unsignedTx'], inputIndices: params['inputIndices'], summary: params['summary'],
+    });
+  }
+
+  if (method === 'signMessage') {
+    return await pendApproval('txm_signmsg_req', { message: params['message'] });
+  }
+
   throw new Error(`Unknown dapp method: ${method}`);
 }
 
@@ -126,6 +136,30 @@ interface AssetReq {
   status: 'pending' | 'confirmed' | 'rejected';
   txid?: string;
   error?: string;
+}
+
+// Generic pending-approval: stash a request in chrome.storage.session under
+// `key`, raise the badge, open the popup, and resolve with the popup's `result`
+// (or reject with its error). Used by signAssetTxPartial (returns the
+// partially-signed tx) and signMessage (returns {pubkey, sig}).
+async function pendApproval(key: string, payload: Record<string, unknown>): Promise<unknown> {
+  const reqId = Date.now().toString();
+  await (chrome.storage.session as any).set({ [key]: { reqId, ...payload, status: 'pending' } });
+  await chrome.action.setBadgeText({ text: '1' });
+  await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+  await openApprovalPopup();
+  const deadline = Date.now() + 10 * 60 * 1000;
+  while (Date.now() < deadline) {
+    await sleep(600);
+    const data = await (chrome.storage.session as any).get(key);
+    const req = data[key] as { reqId: string; status: string; result?: unknown; error?: string } | undefined;
+    if (!req || req.reqId !== reqId || req.status === 'pending') continue;
+    if (req.status === 'confirmed') return req.result;
+    throw new Error(req.error ?? 'Request rejected');
+  }
+  await (chrome.storage.session as any).remove(key);
+  await chrome.action.setBadgeText({ text: '' });
+  throw new Error('Confirmation timed out — please try again');
 }
 
 async function fetchAssets(address: string): Promise<{ fungible: unknown[]; nfts: unknown[] }> {
