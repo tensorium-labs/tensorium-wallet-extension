@@ -8,6 +8,12 @@ describe('inpage provider — asset tx methods', () => {
     expect(src).toContain('signAssetTx:');
     expect(src).toContain('getAssets:');
   });
+
+  it('exposes signAssetTxPartial and signMessage on window.tensorium', () => {
+    const src = fs.readFileSync(path.join(__dirname, '../inpage/index.ts'), 'utf-8');
+    expect(src).toContain('signAssetTxPartial:');
+    expect(src).toContain('signMessage:');
+  });
 });
 
 describe('background dispatcher — asset tx methods', () => {

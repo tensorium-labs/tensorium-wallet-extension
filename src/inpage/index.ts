@@ -33,5 +33,8 @@
     signAssetTx: (unsignedTx: unknown, summary: unknown) =>
       request('signAssetTx', { unsignedTx, summary }),
     getAssets: (address: string) => request('getAssets', { address }),
+    signAssetTxPartial: (unsignedTx: unknown, inputIndices: number[], summary: unknown) =>
+      request('signAssetTxPartial', { unsignedTx, inputIndices, summary }),
+    signMessage: (message: string) => request('signMessage', { message }),
   };
 })();
